@@ -6,6 +6,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 /**
  * Allows reading HTTP lines (i.e. lines terminated by \r\n)
@@ -51,7 +52,7 @@ class HttpLineReader {
         }
         if (!firstRead) {
             baos.write(lastByte);
-            lineProcessor.processLine(baos.toString());
+            lineProcessor.processLine(new String(baos.toByteArray(), StandardCharsets.US_ASCII));
         }
         return lineProcessor.getResult();
     }

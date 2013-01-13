@@ -8,6 +8,7 @@ import com.ninja_squad.jb.codestory.HttpRequest;
 import com.ninja_squad.jb.codestory.HttpResponse;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
 /**
@@ -26,7 +27,7 @@ public class CodeStoryActionFactory implements ActionFactory {
         public HttpResponse execute(HttpRequest request) throws IOException {
             return new HttpResponse(HttpResponse.Status._404_NOT_FOUND,
                                     HttpHeaders.NO_HEADER,
-                                    DEFAULT_ANSWER.getBytes());
+                                    DEFAULT_ANSWER.getBytes(StandardCharsets.US_ASCII));
         }
     };
 

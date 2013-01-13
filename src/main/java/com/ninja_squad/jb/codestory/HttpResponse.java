@@ -8,6 +8,7 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
 /**
@@ -68,7 +69,7 @@ public final class HttpResponse {
 
     public void send(OutputStream out) throws IOException {
         String EOL = "\r\n";
-        Writer writer = new OutputStreamWriter(out);
+        Writer writer = new OutputStreamWriter(out, StandardCharsets.US_ASCII);
         writer.write("HTTP/1.1 ");
         writer.write(String.valueOf(status.getCode()));
         writer.write(" ");
