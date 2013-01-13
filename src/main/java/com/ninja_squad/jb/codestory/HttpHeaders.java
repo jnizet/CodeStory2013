@@ -24,7 +24,7 @@ public final class HttpHeaders {
         new HttpHeaders(ImmutableMap.of(HttpHeaders.CONTENT_TYPE, "text/plain; charset=us-ascii"));
 
     private final Map<String, String> map;
-    private Optional<ContentType> contentType;
+    private final Optional<ContentType> contentType;
 
     public HttpHeaders(Map<String, String> map) {
         this.map = ImmutableMap.copyOf(map);

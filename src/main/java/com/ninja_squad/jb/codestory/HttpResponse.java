@@ -22,8 +22,8 @@ public final class HttpResponse {
         _400_BAD_REQUEST(400, "Bad Request"),
         _404_NOT_FOUND(404, "Not Found");
 
-        private int code;
-        private String reason;
+        private final int code;
+        private final String reason;
 
         private Status(int code, String reason) {
             this.code = code;
