@@ -22,6 +22,11 @@ dependencies {
 
 [compileJava, compileTestJava]*.options*.encoding = 'ISO-8859-1'
 
+configurations {
+    runtime.exclude group: 'com.google.code.findbugs'
+    runtime.exclude group: 'net.sourceforge.findbugs'
+}
+
 findbugs {
     sourceSets = [sourceSets.main]
     ignoreFailures = true
