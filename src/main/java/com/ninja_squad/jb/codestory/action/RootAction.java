@@ -22,8 +22,12 @@ public class RootAction implements Action {
     @Override
     public HttpResponse execute(HttpRequest request) throws IOException {
         if (EMAIL_ADDRESS_QUESTION.equals(request.getParameters().getSingleParameter("q").orNull())) {
-            return new HttpResponse(200, HttpHeaders.PLAIN_ASCII_TEXT, EMAIL_ADDRESS_ANSWER.getBytes(StandardCharsets.US_ASCII));
+            return new HttpResponse(HttpResponse.Status._200_OK,
+                                    HttpHeaders.PLAIN_ASCII_TEXT,
+                                    EMAIL_ADDRESS_ANSWER.getBytes(StandardCharsets.US_ASCII));
         }
-        return new HttpResponse(400, HttpHeaders.PLAIN_ASCII_TEXT, BAD_REQUEST_ANSWER.getBytes(StandardCharsets.US_ASCII));
+        return new HttpResponse(HttpResponse.Status._400_BAD_REQUEST,
+                                HttpHeaders.PLAIN_ASCII_TEXT,
+                                BAD_REQUEST_ANSWER.getBytes(StandardCharsets.US_ASCII));
     }
 }

@@ -16,6 +16,8 @@ public class PostAction implements Action {
     @Override
     public HttpResponse execute(HttpRequest request) throws IOException {
         PostBodyCache.INSTANCE.addBody(request.getBody());
-        return new HttpResponse(404, HttpHeaders.NO_HEADER, null);
+        return new HttpResponse(HttpResponse.Status._404_NOT_FOUND,
+                                HttpHeaders.NO_HEADER,
+                                null);
     }
 }

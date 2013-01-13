@@ -2,6 +2,7 @@ package com.ninja_squad.jb.codestory;
 
 import com.google.common.base.Objects;
 import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
 import com.google.common.base.Throwables;
 import com.google.common.collect.ArrayListMultimap;
@@ -11,6 +12,7 @@ import com.google.common.collect.Maps;
 import com.google.common.io.ByteStreams;
 import com.google.common.io.LineProcessor;
 
+import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
@@ -43,11 +45,15 @@ public class HttpRequest {
     private HttpHeaders headers;
     private byte[] body = NO_BODY;
 
-    public HttpRequest(Method method, String path, HttpParameters parameters, HttpHeaders headers, byte[] body) {
-        this.method = method;
-        this.path = path;
-        this.parameters = parameters;
-        this.headers = headers;
+    public HttpRequest(@Nonnull Method method,
+                       @Nonnull String path,
+                       @Nonnull HttpParameters parameters,
+                       @Nonnull HttpHeaders headers,
+                       byte[] body) {
+        this.method = Preconditions.checkNotNull(method);
+        this.path = Preconditions.checkNotNull(path);
+        this.parameters = Preconditions.checkNotNull(parameters);
+        this.headers = Preconditions.checkNotNull(headers);
         this.body = body == null ? NO_BODY : body;
     }
 
@@ -58,7 +64,8 @@ public class HttpRequest {
         return new RequestParser().parse(in);
     }
 
-    public static HttpRequest get(String pathAndQueryString) {
+    public static HttpRequest get(@Nonnull String pathAndQueryString) {
+        Preconditions.checkNotNull(pathAndQueryString);
         HttpRequest request = new HttpRequest();
         request.method = Method.GET;
         new RequestParser().parsePathAndQueryString(pathAndQueryString, request);

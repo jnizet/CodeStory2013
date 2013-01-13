@@ -1,6 +1,7 @@
 package com.ninja_squad.jb.codestory.action;
 
 import com.ninja_squad.jb.codestory.HttpRequest;
+import com.ninja_squad.jb.codestory.HttpResponse;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -22,10 +23,15 @@ public class CodeStoryActionFactoryTest {
     }
 
     @Test
-    public void getActionShouldReturnDefaultAnswererForUnknownQuestion() throws IOException {
-        HttpRequest request = HttpRequest.get("/q=Comment+ca+va");
-        assertThat(actionFactory.getAction(request).execute(request).getStatus())
-            .isEqualTo(404);
+    public void getActionShouldReturnNotFoundForUnknownPath() throws IOException {
+        HttpRequest request = HttpRequest.get("/foo?q=Quelle+est+ton+adresse+email");
+        assertThat(actionFactory.getAction(request).execute(request).getStatus()).isEqualTo(HttpResponse.Status._404_NOT_FOUND);
+    }
+
+    @Test
+    public void getActionShouldReturnBadRequestForUnknownQuestion() throws IOException {
+        HttpRequest request = HttpRequest.get("/?q=Comment+ca+va");
+        assertThat(actionFactory.getAction(request).execute(request).getStatus()).isEqualTo(HttpResponse.Status._400_BAD_REQUEST);
     }
 
     @Test

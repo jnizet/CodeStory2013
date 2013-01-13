@@ -24,7 +24,9 @@ public class CodeStoryActionFactory implements ActionFactory {
     private static final Action DEFAULT_ACTION = new Action() {
         @Override
         public HttpResponse execute(HttpRequest request) throws IOException {
-            return new HttpResponse(404, HttpHeaders.NO_HEADER, DEFAULT_ANSWER.getBytes());
+            return new HttpResponse(HttpResponse.Status._404_NOT_FOUND,
+                                    HttpHeaders.NO_HEADER,
+                                    DEFAULT_ANSWER.getBytes());
         }
     };
 

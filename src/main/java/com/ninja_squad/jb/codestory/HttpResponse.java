@@ -1,5 +1,8 @@
 package com.ninja_squad.jb.codestory;
 
+import com.google.common.base.Preconditions;
+
+import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
@@ -11,20 +14,43 @@ import java.util.Map;
  * An HTTP response
  * @author JB
  */
-public class HttpResponse {
+public final class HttpResponse {
+
+    public static enum Status {
+        _200_OK(200, "OK"),
+        _400_BAD_REQUEST(400, "Bad Request"),
+        _404_NOT_FOUND(404, "Not Found");
+
+        private int code;
+        private String reason;
+
+        private Status(int code, String reason) {
+            this.code = code;
+            this.reason = reason;
+        }
+
+        public int getCode() {
+            return code;
+        }
+
+        public String getReason() {
+            return reason;
+        }
+    }
+
     private static final byte[] NO_BODY = new byte[0];
 
-    private final int status;
+    private final Status status;
     private final HttpHeaders headers;
     private final byte[] body;
 
-    public HttpResponse(int status, HttpHeaders headers, byte[] body) {
-        this.status = status;
-        this.headers = headers;
+    public HttpResponse(@Nonnull Status status, @Nonnull HttpHeaders headers, byte[] body) {
+        this.status = Preconditions.checkNotNull(status);
+        this.headers = Preconditions.checkNotNull(headers);
         this.body = body == null ? NO_BODY : body;
     }
 
-    public int getStatus() {
+    public Status getStatus() {
         return status;
     }
 
@@ -44,7 +70,9 @@ public class HttpResponse {
         String EOL = "\r\n";
         Writer writer = new OutputStreamWriter(out);
         writer.write("HTTP/1.1 ");
-        writer.write(String.valueOf(status));
+        writer.write(String.valueOf(status.getCode()));
+        writer.write(" ");
+        writer.write(status.getReason());
         writer.write(EOL);
         writer.write("Server: JB's CodeStory Server");
         writer.write(EOL);
