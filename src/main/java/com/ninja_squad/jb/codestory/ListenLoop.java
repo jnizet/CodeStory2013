@@ -1,16 +1,21 @@
 package com.ninja_squad.jb.codestory;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Throwables;
 import com.google.common.io.Closeables;
 
 import javax.annotation.Nonnull;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -78,7 +83,13 @@ class ListenLoop implements Runnable {
                 try (InputStream in = new BufferedInputStream(socket.getInputStream());
                      OutputStream out = new BufferedOutputStream(socket.getOutputStream())) {
                     HttpRequest request = HttpRequest.parse(in);
-                    HttpResponse response = actionFactory.getAction(request).execute(request);
+                    HttpResponse response;
+                    try {
+                        response = actionFactory.getAction(request).execute(request);
+                    }
+                    catch (Exception e) {
+                        response = createErrorResponse(e);
+                    }
                     response.send(out);
                 }
                 catch (IOException e) {
@@ -94,6 +105,23 @@ class ListenLoop implements Runnable {
                     }
                 }
             }
+
+
         });
+    }
+
+    @VisibleForTesting
+    protected HttpResponse createErrorResponse(Exception e) {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        PrintWriter out = new PrintWriter(new OutputStreamWriter(baos, StandardCharsets.UTF_8));
+        out.println("Internal error:");
+        e.printStackTrace(out);
+        out.flush();
+        out.close();
+        return new HttpResponse(HttpResponse.Status._500_INTERNAL_ERROR,
+                                HttpHeaders.builder()
+                                           .setContentType("text/plain", StandardCharsets.UTF_8)
+                                           .build(),
+                                baos.toByteArray());
     }
 }

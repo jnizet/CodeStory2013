@@ -109,20 +109,7 @@ public class HttpRequest {
         public HttpRequest parse(InputStream in) throws IOException {
             HttpRequest request = new HttpRequest();
             parseHead(in, request);
-            int contentLength = Integer.parseInt(request.getHeaders().getHeader(HttpHeaders.CONTENT_LENGTH).or("0"));
-            Optional<HttpHeaders.ContentType> contentType = request.getHeaders().getContentType();
-            byte[] body = NO_BODY;
-            if (contentLength > 0) {
-                body = new byte[contentLength];
-                ByteStreams.readFully(in, body);
-                if (contentType.isPresent() && contentType.get().getName().equals("application/x-www-form-urlencoded")) {
-                    Charset charset = contentType.get().getCharset();
-                    parseQueryString(request,
-                                     new String(body, charset),
-                                     charset);
-                }
-            }
-            request.body = body;
+            parseBody(in, request);
             return request;
         }
 
@@ -190,6 +177,23 @@ public class HttpRequest {
                 parameters.put(pair.get(0), pair.size() < 2 ? "" : URLDecoder.decode(pair.get(1), charset.name()));
             }
             request.parameters = new HttpParameters(parameters);
+        }
+
+        private void parseBody(InputStream in, HttpRequest request) throws IOException {
+            int contentLength = Integer.parseInt(request.getHeaders().getHeader(HttpHeaders.CONTENT_LENGTH).or("0"));
+            Optional<HttpHeaders.ContentType> contentType = request.getHeaders().getContentType();
+            byte[] body = NO_BODY;
+            if (contentLength > 0) {
+                body = new byte[contentLength];
+                ByteStreams.readFully(in, body);
+                if (contentType.isPresent() && contentType.get().getName().equals("application/x-www-form-urlencoded")) {
+                    Charset charset = contentType.get().getCharset();
+                    parseQueryString(request,
+                                     new String(body, charset),
+                                     charset);
+                }
+            }
+            request.body = body;
         }
     }
 }
