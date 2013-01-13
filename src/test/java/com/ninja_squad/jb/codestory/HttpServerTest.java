@@ -20,13 +20,14 @@ import static org.fest.assertions.Assertions.*;
  * @author JB
  */
 public class HttpServerTest {
-    private static final String ADDRESS = "http://localhost:" + HttpServer.DEFAULT_PORT + "/";
+    private static final int PORT = 56789;
+    private static final String ADDRESS = "http://localhost:" + PORT + "/";
 
     private static HttpServer httpServer;
 
     @BeforeClass
     public static void beforeClass() throws IOException {
-        httpServer = new HttpServer(HttpServer.DEFAULT_PORT);
+        httpServer = new HttpServer(PORT);
         httpServer.start(new CodeStoryActionFactory());
     }
 
@@ -71,9 +72,7 @@ public class HttpServerTest {
     @Test
     public void serverShouldFailWhenPostRequestSent() throws IOException {
         HttpResponse response = Request.Post(ADDRESS)
-                                       .bodyForm(new BasicNameValuePair("param1", "value1"),
-                                                 new BasicNameValuePair("param2", "value2"),
-                                                 new BasicNameValuePair("param1", "value3"))
+                                       .bodyForm(new BasicNameValuePair("q", RootAction.EMAIL_ADDRESS_QUESTION))
                                        .execute()
                                        .returnResponse();
         check400(response);

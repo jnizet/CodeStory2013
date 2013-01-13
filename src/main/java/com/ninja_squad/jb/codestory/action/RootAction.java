@@ -21,7 +21,8 @@ public class RootAction implements Action {
 
     @Override
     public HttpResponse execute(HttpRequest request) throws IOException {
-        if (EMAIL_ADDRESS_QUESTION.equals(request.getParameters().getSingleParameter("q").orNull())) {
+        if (request.getMethod() == HttpRequest.Method.GET
+            && EMAIL_ADDRESS_QUESTION.equals(request.getParameters().getSingleParameter("q").orNull())) {
             return new HttpResponse(HttpResponse.Status._200_OK,
                                     HttpHeaders.PLAIN_ASCII_TEXT,
                                     EMAIL_ADDRESS_ANSWER.getBytes(StandardCharsets.US_ASCII));
