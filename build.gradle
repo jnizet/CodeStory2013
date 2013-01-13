@@ -1,8 +1,10 @@
 apply plugin : 'java'
 apply plugin : 'findbugs'
+apply plugin :'application'
 
 group = 'com.ninja-squad'
 sourceCompatibility = '1.7'
+mainClassName = 'com.ninja_squad.jb.codestory.HttpServer'
 
 repositories {
     mavenCentral()

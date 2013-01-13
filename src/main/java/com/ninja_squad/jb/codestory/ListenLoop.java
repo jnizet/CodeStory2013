@@ -1,5 +1,6 @@
 package com.ninja_squad.jb.codestory;
 
+import com.google.common.base.Throwables;
 import com.google.common.io.Closeables;
 
 import javax.annotation.Nonnull;
@@ -10,17 +11,20 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
- * The main loop, which listens for new HTTP connections. Given the simplicity of what the server must do,
- * all the requests are served synchronously, by a single thread.
+ * The main loop, which listens for new HTTP connections.
  * @author JB
  */
 class ListenLoop implements Runnable {
 
     private final ServerSocket serverSocket;
     private final ActionFactory actionFactory;
+
+    private final ExecutorService requestExecutor;
 
     /**
      * Indicates that the thread should stop serving requests. We can't use standard thread interrupts because
@@ -32,6 +36,7 @@ class ListenLoop implements Runnable {
                       @Nonnull ActionFactory actionFactory) {
         this.serverSocket = serverSocket;
         this.actionFactory = actionFactory;
+        this.requestExecutor = Executors.newCachedThreadPool();
     }
 
     /**
@@ -39,6 +44,7 @@ class ListenLoop implements Runnable {
      */
     public void stop() {
         stopped.set(true);
+        this.requestExecutor.shutdownNow();
         try {
             serverSocket.close();
         }
@@ -65,15 +71,29 @@ class ListenLoop implements Runnable {
     /**
      * Answers to a request.
      */
-    private void answerTo(Socket socket) throws IOException {
-        try (InputStream in = new BufferedInputStream(socket.getInputStream());
-             OutputStream out = new BufferedOutputStream(socket.getOutputStream())) {
-            HttpRequest request = HttpRequest.parse(in);
-            HttpResponse response = actionFactory.getAction(request).execute(request);
-            response.send(out);
-        }
-        finally {
-            Closeables.close(socket, true);
-        }
+    private void answerTo(final Socket socket) {
+        requestExecutor.execute(new Runnable() {
+            @Override
+            public void run() {
+                try (InputStream in = new BufferedInputStream(socket.getInputStream());
+                     OutputStream out = new BufferedOutputStream(socket.getOutputStream())) {
+                    HttpRequest request = HttpRequest.parse(in);
+                    HttpResponse response = actionFactory.getAction(request).execute(request);
+                    response.send(out);
+                }
+                catch (IOException e) {
+                    // too bad
+                }
+                finally {
+                    try {
+                        Closeables.close(socket, true);
+                    }
+                    catch (IOException e) {
+                        // impossible
+                        throw Throwables.propagate(e);
+                    }
+                }
+            }
+        });
     }
 }

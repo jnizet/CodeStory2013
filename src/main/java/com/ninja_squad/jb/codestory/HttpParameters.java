@@ -1,5 +1,6 @@
 package com.ninja_squad.jb.codestory;
 
+import com.google.common.base.Objects;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableListMultimap;
 import com.google.common.collect.ListMultimap;
@@ -28,5 +29,10 @@ public class HttpParameters {
 
     public ListMultimap<String, String> asMap() {
         return map;
+    }
+
+    @Override
+    public String toString() {
+        return Objects.toStringHelper(this).add("map", map).toString();
     }
 }

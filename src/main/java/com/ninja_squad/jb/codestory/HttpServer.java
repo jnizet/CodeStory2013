@@ -56,6 +56,7 @@ public class HttpServer {
             port = Integer.parseInt(args[0]);
         }
 
+        System.out.println("Starting HTTP Server on port " + port);
         new HttpServer(port).start(new CodeStoryActionFactory());
     }
 }

@@ -1,5 +1,6 @@
 package com.ninja_squad.jb.codestory;
 
+import com.google.common.base.Objects;
 import com.google.common.base.Optional;
 import com.google.common.base.Splitter;
 import com.google.common.base.Throwables;
@@ -16,6 +17,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -83,6 +85,17 @@ public class HttpRequest {
 
     public byte[] getBody() {
         return body;
+    }
+
+    @Override
+    public String toString() {
+        return Objects.toStringHelper(this)
+                      .add("method", method)
+                      .add("path", path)
+                      .add("parameters", parameters)
+                      .add("headers", headers)
+                      .add("body", Arrays.toString(body))
+                      .toString();
     }
 
     private static class RequestParser {

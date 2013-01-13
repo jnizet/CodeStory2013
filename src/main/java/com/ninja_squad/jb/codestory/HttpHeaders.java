@@ -1,5 +1,6 @@
 package com.ninja_squad.jb.codestory;
 
+import com.google.common.base.Objects;
 import com.google.common.base.Optional;
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableMap;
@@ -48,6 +49,11 @@ public final class HttpHeaders {
         return contentType;
     }
 
+    @Override
+    public String toString() {
+        return Objects.toStringHelper(this).add("map", map).add("contentType", contentType).toString();
+    }
+
     public static class ContentType {
         private final String name;
         private final Charset charset;
@@ -78,6 +84,11 @@ public final class HttpHeaders {
 
         public Charset getCharset() {
             return charset;
+        }
+
+        @Override
+        public String toString() {
+            return Objects.toStringHelper(this).add("name", name).add("charset", charset).toString();
         }
     }
 }
