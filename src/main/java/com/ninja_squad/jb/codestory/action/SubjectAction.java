@@ -45,9 +45,7 @@ public class SubjectAction implements Action {
 
     private HttpResponse doGet(HttpRequest subject) {
         if (subject == null) {
-            return new HttpResponse(HttpResponse.Status._200_OK,
-                                    HttpHeaders.PLAIN_ASCII_TEXT,
-                                    "Aucun sujet poste".getBytes(StandardCharsets.US_ASCII));
+            return HttpResponse.ok("Aucun sujet poste");
         }
         else {
             return new HttpResponse(HttpResponse.Status._200_OK,

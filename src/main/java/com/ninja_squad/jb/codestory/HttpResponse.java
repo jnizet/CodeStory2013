@@ -53,6 +53,18 @@ public final class HttpResponse {
         this.body = body == null ? NO_BODY : body;
     }
 
+    public static HttpResponse badRequest(@Nonnull String body) {
+        return new HttpResponse(Status._400_BAD_REQUEST,
+                                HttpHeaders.PLAIN_ASCII_TEXT,
+                                body.getBytes(StandardCharsets.US_ASCII));
+    }
+
+    public static HttpResponse ok(@Nonnull String body) {
+        return new HttpResponse(Status._200_OK,
+                                HttpHeaders.PLAIN_ASCII_TEXT,
+                                body.getBytes(StandardCharsets.US_ASCII));
+    }
+
     public Status getStatus() {
         return status;
     }

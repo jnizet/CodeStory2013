@@ -36,6 +36,14 @@ public class CodeStoryActionFactoryTest {
     }
 
     @Test
+    public void getActionShouldReturnRootActionForArithmeticExpression() throws IOException {
+        HttpRequest request = HttpRequest.get("/?q=1+2");
+        assertThat(actionFactory.getAction(request)).isInstanceOf(ArithmeticAction.class);
+        request = HttpRequest.get("/?q=(1+2)");
+        assertThat(actionFactory.getAction(request)).isInstanceOf(ArithmeticAction.class);
+    }
+
+    @Test
     public void getActionShouldReturnSubjectActionForPost() throws IOException {
         HttpRequest request = new HttpRequest(HttpRequest.Method.POST,
                                               "/",

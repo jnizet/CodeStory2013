@@ -33,9 +33,7 @@ public class SkalaskelAction implements Action {
         catch (NumberFormatException e) {
             // ignore : send bad request
         }
-        return new HttpResponse(HttpResponse.Status._400_BAD_REQUEST,
-                                HttpHeaders.PLAIN_ASCII_TEXT,
-                                ("Bad amount: " + amountAsString).getBytes(StandardCharsets.US_ASCII));
+        return HttpResponse.badRequest("Bad amount: " + amountAsString);
     }
 
     private HttpResponse executeSkalaskel(int amount) {

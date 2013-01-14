@@ -120,6 +120,15 @@ public class HttpServerTest {
     }
 
     @Test
+    public void serverShouldAnswerWith2For1Plus1() throws IOException {
+        String result = Request.Get(ADDRESS + "?q=1+1")
+                               .execute()
+                               .returnContent()
+                               .asString();
+        assertThat(result).isEqualTo("2.0");
+    }
+
+    @Test
     public void serverShouldAnswerWith400WhenNoQuestion() throws IOException {
         HttpResponse response = Request.Get(ADDRESS).execute().returnResponse();
         check400(response);

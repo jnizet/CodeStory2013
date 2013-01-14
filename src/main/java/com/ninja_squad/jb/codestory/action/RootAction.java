@@ -2,12 +2,10 @@ package com.ninja_squad.jb.codestory.action;
 
 import com.google.common.collect.ImmutableMap;
 import com.ninja_squad.jb.codestory.Action;
-import com.ninja_squad.jb.codestory.HttpHeaders;
 import com.ninja_squad.jb.codestory.HttpRequest;
 import com.ninja_squad.jb.codestory.HttpResponse;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
 /**
@@ -51,13 +49,9 @@ public class RootAction implements Action {
         if (request.getMethod() == HttpRequest.Method.GET) {
             String answer = ANSWERS_BY_QUESTION.get(request.getParameters().getSingleParameter("q").orNull());
             if (answer != null) {
-                return new HttpResponse(HttpResponse.Status._200_OK,
-                                        HttpHeaders.PLAIN_ASCII_TEXT,
-                                        answer.getBytes(StandardCharsets.US_ASCII));
+                return HttpResponse.ok(answer);
             }
         }
-        return new HttpResponse(HttpResponse.Status._400_BAD_REQUEST,
-                                HttpHeaders.PLAIN_ASCII_TEXT,
-                                BAD_REQUEST_ANSWER.getBytes(StandardCharsets.US_ASCII));
+        return HttpResponse.badRequest(BAD_REQUEST_ANSWER);
     }
 }

@@ -11,6 +11,7 @@ import com.ninja_squad.jb.codestory.HttpResponse;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 /**
  * The action factory for CodeStory.
@@ -19,6 +20,7 @@ import java.util.Map;
 public class CodeStoryActionFactory implements ActionFactory {
 
     public static final String DEFAULT_ANSWER = "What?";
+    private static final Pattern ARITHMETIC_EXPRESSION_PATTERN = Pattern.compile("/\\?q=[(,\\d].*");
 
     /**
      * The default action. Returns a 404.
@@ -61,6 +63,11 @@ public class CodeStoryActionFactory implements ActionFactory {
         if (request.getMethod() == HttpRequest.Method.GET
             && request.getPath().startsWith("/scalaskel/change/")) {
             return new SkalaskelAction();
+        }
+        if (request.getMethod() == HttpRequest.Method.GET
+            && request.getParameters().getSingleParameter("q").isPresent()
+            && ARITHMETIC_EXPRESSION_PATTERN.matcher(request.getPathAndQueryString()).matches()) {
+            return new ArithmeticAction();
         }
         Supplier<Action> supplier = ACTIONS_BY_PATH.get(request.getPath());
         if (supplier == null) {

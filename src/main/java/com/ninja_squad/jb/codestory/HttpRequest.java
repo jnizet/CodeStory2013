@@ -41,6 +41,7 @@ public class HttpRequest {
 
     private Method method;
     private String path;
+    private String pathAndQueryString;
     private HttpParameters parameters;
     private HttpHeaders headers;
     private byte[] body = NO_BODY;
@@ -68,6 +69,7 @@ public class HttpRequest {
         Preconditions.checkNotNull(pathAndQueryString);
         HttpRequest request = new HttpRequest();
         request.method = Method.GET;
+        request.pathAndQueryString = pathAndQueryString;
         new RequestParser().parsePathAndQueryString(pathAndQueryString, request);
         request.headers = HttpHeaders.NO_HEADER;
         request.body = NO_BODY;
@@ -94,6 +96,10 @@ public class HttpRequest {
         return body;
     }
 
+    public String getPathAndQueryString() {
+        return pathAndQueryString;
+    }
+
     public Charset getContentCharset() {
         if (headers.getContentType().isPresent()) {
             return headers.getContentType().get().getCharset();
@@ -106,6 +112,7 @@ public class HttpRequest {
         return Objects.toStringHelper(this)
                       .add("method", method)
                       .add("path", path)
+                      .add("pathAndQueryString", pathAndQueryString)
                       .add("parameters", parameters)
                       .add("headers", headers)
                       .add("body", Arrays.toString(body))
@@ -158,8 +165,8 @@ public class HttpRequest {
         private void parseFirstLine(String line, HttpRequest request) {
             Iterator<String> parts = Splitter.on(' ').split(line).iterator();
             request.method = Method.valueOf(parts.next());
-            String pathAndQueryString = parts.next();
-            parsePathAndQueryString(pathAndQueryString, request);
+            request.pathAndQueryString = parts.next();
+            parsePathAndQueryString(request.pathAndQueryString, request);
         }
 
         private void parsePathAndQueryString(String pathAndQueryString, HttpRequest request) {

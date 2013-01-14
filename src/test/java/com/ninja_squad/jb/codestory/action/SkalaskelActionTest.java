@@ -6,7 +6,6 @@ import org.junit.Test;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.Set;
 
 import static com.ninja_squad.jb.codestory.action.SkalaskelAction.*;
 import static org.fest.assertions.Assertions.*;
@@ -65,7 +64,5 @@ public class SkalaskelActionTest {
                                                    new Change(0, 0, 2, 7),
                                                    new Change(0, 0, 1, 14),
                                                    new Change(0, 0, 0, 21));
-        Set<Change> change100 = action.change(100);
-        System.out.println("change(100) = " + change100.size() + " - " + change100);
     }
 }
