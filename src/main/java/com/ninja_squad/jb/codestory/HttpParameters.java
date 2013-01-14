@@ -12,6 +12,8 @@ import java.util.List;
  * @author JB
  */
 public class HttpParameters {
+    public static final HttpParameters NO_PARAMETER = new HttpParameters(ImmutableListMultimap.<String, String>of());
+
     private final ListMultimap<String, String> map;
 
     public HttpParameters(ListMultimap<String, String> map) {

@@ -61,6 +61,8 @@ public final class HttpHeaders {
     }
 
     public static class ContentType {
+        public static final Charset DEFAULT_CHARSET = StandardCharsets.ISO_8859_1;
+
         private final String name;
         private final Charset charset;
 
@@ -72,7 +74,7 @@ public final class HttpHeaders {
         public static ContentType parse(String line) {
             Iterator<String> parts = Splitter.on(';').trimResults().split(line).iterator();
             String name = parts.next();
-            Charset charset = StandardCharsets.ISO_8859_1;
+            Charset charset = DEFAULT_CHARSET;
             if (parts.hasNext()) {
                 String charsetDefinition = parts.next();
                 Iterator<String> charsetParts = Splitter.on('=').trimResults().split(charsetDefinition).iterator();

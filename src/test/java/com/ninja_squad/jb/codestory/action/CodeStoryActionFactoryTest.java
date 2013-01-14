@@ -1,5 +1,7 @@
 package com.ninja_squad.jb.codestory.action;
 
+import com.ninja_squad.jb.codestory.HttpHeaders;
+import com.ninja_squad.jb.codestory.HttpParameters;
 import com.ninja_squad.jb.codestory.HttpRequest;
 import com.ninja_squad.jb.codestory.HttpResponse;
 import org.junit.Before;
@@ -53,5 +55,31 @@ public class CodeStoryActionFactoryTest {
         HttpRequest request = HttpRequest.get("/?q=Es+tu+heureux+de+participer(OUI/NON)");
         assertThat(actionFactory.getAction(request).execute(request).getBodyAsString(StandardCharsets.US_ASCII))
             .isEqualTo("OUI");
+    }
+
+    @Test
+    public void getActionShouldReturnYesForStep4Question() throws IOException {
+        HttpRequest request = HttpRequest.get("/?q=Es+tu+pret+a+recevoir+une+enonce+au+format+markdown+par+http+post(OUI/NON)");
+        assertThat(actionFactory.getAction(request).execute(request).getBodyAsString(StandardCharsets.US_ASCII))
+            .isEqualTo("OUI");
+    }
+
+    @Test
+    public void getActionShouldReturnWellReceivedForSubjectPost() throws IOException {
+        SubjectAction.reset();
+        HttpRequest getRequest = HttpRequest.get("/subject");
+        assertThat(actionFactory.getAction(getRequest).execute(getRequest).getBodyAsString(StandardCharsets.UTF_8))
+            .isEqualTo("Aucun sujet poste");
+
+        HttpRequest postRequest = new HttpRequest(HttpRequest.Method.POST,
+                                                 "/",
+                                                  HttpParameters.NO_PARAMETER,
+                                                  HttpHeaders.PLAIN_ASCII_TEXT,
+                                                  "The subject".getBytes(StandardCharsets.US_ASCII));
+        assertThat(actionFactory.getAction(postRequest).execute(postRequest).getBodyAsString(StandardCharsets.US_ASCII))
+            .isEqualTo("Bien recu");
+
+        assertThat(actionFactory.getAction(getRequest).execute(getRequest).getBodyAsString(StandardCharsets.UTF_8))
+            .isEqualTo("The subject");
     }
 }

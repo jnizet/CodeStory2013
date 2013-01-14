@@ -31,15 +31,20 @@ public class CodeStoryActionFactory implements ActionFactory {
         }
     };
 
-    private final Map<String, Action> actionsByPath =
-        ImmutableMap.<String, Action>of("/", new RootAction());
+    private static final Action SUBJECT_ACTION = new SubjectAction();
+
+    private static final Map<String, Action> ACTIONS_BY_PATH =
+        ImmutableMap.of("/", new RootAction(), "/subject", SUBJECT_ACTION);
 
     /**
      * Gets the appropriate answerer based on the given request path
      */
     @Override
     public Action getAction(HttpRequest request) {
-        Action action = actionsByPath.get(request.getPath());
+        if (request.getMethod() == HttpRequest.Method.POST) {
+            return SUBJECT_ACTION;
+        }
+        Action action = ACTIONS_BY_PATH.get(request.getPath());
         if (action == null) {
             action = DEFAULT_ACTION;
         }

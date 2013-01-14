@@ -94,6 +94,13 @@ public class HttpRequest {
         return body;
     }
 
+    public Charset getContentCharset() {
+        if (headers.getContentType().isPresent()) {
+            return headers.getContentType().get().getCharset();
+        }
+        return HttpHeaders.ContentType.DEFAULT_CHARSET;
+    }
+
     @Override
     public String toString() {
         return Objects.toStringHelper(this)

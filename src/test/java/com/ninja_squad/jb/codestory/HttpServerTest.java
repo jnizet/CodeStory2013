@@ -3,9 +3,10 @@ package com.ninja_squad.jb.codestory;
 import com.google.common.io.ByteStreams;
 import com.ninja_squad.jb.codestory.action.CodeStoryActionFactory;
 import com.ninja_squad.jb.codestory.action.RootAction;
+import com.ninja_squad.jb.codestory.action.SubjectAction;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.fluent.Request;
-import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.entity.ContentType;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -64,9 +65,42 @@ public class HttpServerTest {
     }
 
     @Test
+    public void serverShouldAnswerWithYesForStep4() throws IOException {
+        String result = Request.Get(ADDRESS + "?q=Es+tu+pret+a+recevoir+une+enonce+au+format+markdown+par+http+post(OUI/NON)")
+                               .execute()
+                               .returnContent()
+                               .asString();
+        assertThat(result).isEqualTo(RootAction.READY_FOR_POST_ANSWER);
+    }
+
+    @Test
+    public void serverShouldAnswerWithWellReceivedAndStoreSUbjectForSubject() throws IOException {
+        SubjectAction.reset();
+        HttpResponse response = Request.Post(ADDRESS)
+                                  .bodyString("The subject", ContentType.TEXT_PLAIN)
+                                  .execute()
+                                  .returnResponse();
+        assertThat(response.getStatusLine().getStatusCode()).isEqualTo(com.ninja_squad.jb.codestory.HttpResponse.Status._201_CREATED.getCode());
+        assertThat(new String(ByteStreams.toByteArray(response.getEntity().getContent()),
+                              StandardCharsets.US_ASCII)).isEqualTo(SubjectAction.WELL_RECEIVED);
+
+        String result = Request.Get(ADDRESS + "subject")
+                        .execute()
+                        .returnContent()
+                        .asString();
+        assertThat(result).isEqualTo("The subject");
+    }
+
+    @Test
     public void serverShouldAnswerWith400WhenNoQuestion() throws IOException {
         HttpResponse response = Request.Get(ADDRESS).execute().returnResponse();
         check400(response);
+    }
+
+    @Test
+    public void serverShouldAnswerWith404WhenNotHandlesPath() throws IOException {
+        HttpResponse response = Request.Get(ADDRESS + "/hello").execute().returnResponse();
+        check404(response);
     }
 
     private void check404(HttpResponse response) throws IOException {
@@ -84,15 +118,6 @@ public class HttpServerTest {
     @Test
     public void serverShouldAskToRepeatTheQuestionWhenBadQUestion() throws IOException {
         HttpResponse response = Request.Get(ADDRESS + "?q=Comment+va").execute().returnResponse();
-        check400(response);
-    }
-
-    @Test
-    public void serverShouldFailWhenPostRequestSent() throws IOException {
-        HttpResponse response = Request.Post(ADDRESS)
-                                       .bodyForm(new BasicNameValuePair("q", RootAction.EMAIL_ADDRESS_QUESTION))
-                                       .execute()
-                                       .returnResponse();
         check400(response);
     }
 }
