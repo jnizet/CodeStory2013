@@ -35,9 +35,16 @@ public class CodeStoryActionFactoryTest {
     }
 
     @Test
-    public void getActionShouldReturnAddressEmailAnswererForStep1Question() throws IOException {
+    public void getActionShouldReturnAddressEmailActionForStep1Question() throws IOException {
         HttpRequest request = HttpRequest.get("/?q=Quelle+est+ton+adresse+email");
         assertThat(actionFactory.getAction(request).execute(request).getBodyAsString(StandardCharsets.US_ASCII))
-            .isEqualTo(RootAction.EMAIL_ADDRESS_ANSWER);
+            .isEqualTo("jb+codestory@ninja-squad.com");
+    }
+
+    @Test
+    public void getActionShouldReturnYesForStep2Question() throws IOException {
+        HttpRequest request = HttpRequest.get("/?q=Es+tu+abonne+a+la+mailing+list");
+        assertThat(actionFactory.getAction(request).execute(request).getBodyAsString(StandardCharsets.US_ASCII))
+            .isEqualTo("OUI");
     }
 }

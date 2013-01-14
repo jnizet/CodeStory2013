@@ -37,12 +37,21 @@ public class HttpServerTest {
     }
 
     @Test
-    public void serverShouldAnswerWithEmailAddress() throws IOException {
+    public void serverShouldAnswerWithEmailAddressForStep1() throws IOException {
         String result = Request.Get(ADDRESS + "?q=Quelle+est+ton+adresse+email")
                                .execute()
                                .returnContent()
                                .asString();
         assertThat(result).isEqualTo(RootAction.EMAIL_ADDRESS_ANSWER);
+    }
+
+    @Test
+    public void serverShouldAnswerWithYesForStep2() throws IOException {
+        String result = Request.Get(ADDRESS + "?q=Es+tu+abonne+a+la+mailing+list")
+                               .execute()
+                               .returnContent()
+                               .asString();
+        assertThat(result).isEqualTo(RootAction.MAILING_LIST_ANSWER);
     }
 
     @Test
