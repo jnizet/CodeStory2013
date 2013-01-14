@@ -1,5 +1,6 @@
 package com.ninja_squad.jb.codestory.action;
 
+import com.google.common.base.Supplier;
 import com.google.common.collect.ImmutableMap;
 import com.ninja_squad.jb.codestory.Action;
 import com.ninja_squad.jb.codestory.ActionFactory;
@@ -31,10 +32,23 @@ public class CodeStoryActionFactory implements ActionFactory {
         }
     };
 
-    private static final Action SUBJECT_ACTION = new SubjectAction();
-
-    private static final Map<String, Action> ACTIONS_BY_PATH =
-        ImmutableMap.of("/", new RootAction(), "/subject", SUBJECT_ACTION);
+    private static final Map<String, Supplier<Action>> ACTIONS_BY_PATH =
+        ImmutableMap.<String, Supplier<Action>>builder()
+                    .put("/",
+                         new Supplier<Action>() {
+                             @Override
+                             public Action get() {
+                                 return new RootAction();
+                             }
+                         })
+                    .put("/subject",
+                         new Supplier<Action>() {
+                             @Override
+                             public Action get() {
+                                 return new SubjectAction();
+                             }
+                         })
+                    .build();
 
     /**
      * Gets the appropriate answerer based on the given request path
@@ -42,12 +56,16 @@ public class CodeStoryActionFactory implements ActionFactory {
     @Override
     public Action getAction(HttpRequest request) {
         if (request.getMethod() == HttpRequest.Method.POST) {
-            return SUBJECT_ACTION;
+            return new SubjectAction();
         }
-        Action action = ACTIONS_BY_PATH.get(request.getPath());
-        if (action == null) {
-            action = DEFAULT_ACTION;
+        if (request.getMethod() == HttpRequest.Method.GET
+            && request.getPath().startsWith("/scalaskel/change/")) {
+            return new SkalaskelAction();
         }
-        return action;
+        Supplier<Action> supplier = ACTIONS_BY_PATH.get(request.getPath());
+        if (supplier == null) {
+            return DEFAULT_ACTION;
+        }
+        return supplier.get();
     }
 }

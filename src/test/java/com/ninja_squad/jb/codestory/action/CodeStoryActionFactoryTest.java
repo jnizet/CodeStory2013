@@ -8,7 +8,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 
 import static org.fest.assertions.Assertions.*;
 
@@ -26,67 +25,29 @@ public class CodeStoryActionFactoryTest {
 
     @Test
     public void getActionShouldReturnNotFoundForUnknownPath() throws IOException {
-        HttpRequest request = HttpRequest.get("/foo?q=Quelle+est+ton+adresse+email");
+        HttpRequest request = HttpRequest.get("/unknown");
         assertThat(actionFactory.getAction(request).execute(request).getStatus()).isEqualTo(HttpResponse.Status._404_NOT_FOUND);
     }
 
     @Test
-    public void getActionShouldReturnBadRequestForUnknownQuestion() throws IOException {
-        HttpRequest request = HttpRequest.get("/?q=Comment+ca+va");
-        assertThat(actionFactory.getAction(request).execute(request).getStatus()).isEqualTo(HttpResponse.Status._400_BAD_REQUEST);
+    public void getActionShouldReturnRootActionForRootAndGet() throws IOException {
+        HttpRequest request = HttpRequest.get("/");
+        assertThat(actionFactory.getAction(request)).isInstanceOf(RootAction.class);
     }
 
     @Test
-    public void getActionShouldReturnAddressEmailActionForStep1Question() throws IOException {
-        HttpRequest request = HttpRequest.get("/?q=Quelle+est+ton+adresse+email");
-        assertThat(actionFactory.getAction(request).execute(request).getBodyAsString(StandardCharsets.US_ASCII))
-            .isEqualTo("jb+codestory@ninja-squad.com");
+    public void getActionShouldReturnSubjectActionForPost() throws IOException {
+        HttpRequest request = new HttpRequest(HttpRequest.Method.POST,
+                                              "/",
+                                              HttpParameters.NO_PARAMETER,
+                                              HttpHeaders.NO_HEADER,
+                                              null);
+        assertThat(actionFactory.getAction(request)).isInstanceOf(SubjectAction.class);
     }
 
     @Test
-    public void getActionShouldReturnYesForStep2Question() throws IOException {
-        HttpRequest request = HttpRequest.get("/?q=Es+tu+abonne+a+la+mailing+list(OUI/NON)");
-        assertThat(actionFactory.getAction(request).execute(request).getBodyAsString(StandardCharsets.US_ASCII))
-            .isEqualTo("OUI");
-    }
-
-    @Test
-    public void getActionShouldReturnYesForStep3Question() throws IOException {
-        HttpRequest request = HttpRequest.get("/?q=Es+tu+heureux+de+participer(OUI/NON)");
-        assertThat(actionFactory.getAction(request).execute(request).getBodyAsString(StandardCharsets.US_ASCII))
-            .isEqualTo("OUI");
-    }
-
-    @Test
-    public void getActionShouldReturnYesForStep4Question() throws IOException {
-        HttpRequest request = HttpRequest.get("/?q=Es+tu+pret+a+recevoir+une+enonce+au+format+markdown+par+http+post(OUI/NON)");
-        assertThat(actionFactory.getAction(request).execute(request).getBodyAsString(StandardCharsets.US_ASCII))
-            .isEqualTo("OUI");
-    }
-
-    @Test
-    public void getActionShouldReturnYesForStep5Question() throws IOException {
-        HttpRequest request = HttpRequest.get("/?q=Est+ce+que+tu+reponds+toujours+oui(OUI/NON)");
-        assertThat(actionFactory.getAction(request).execute(request).getBodyAsString(StandardCharsets.US_ASCII))
-            .isEqualTo("NON");
-    }
-
-    @Test
-    public void getActionShouldReturnWellReceivedForSubjectPost() throws IOException {
-        SubjectAction.reset();
-        HttpRequest getRequest = HttpRequest.get("/subject");
-        assertThat(actionFactory.getAction(getRequest).execute(getRequest).getBodyAsString(StandardCharsets.UTF_8))
-            .isEqualTo("Aucun sujet poste");
-
-        HttpRequest postRequest = new HttpRequest(HttpRequest.Method.POST,
-                                                 "/",
-                                                  HttpParameters.NO_PARAMETER,
-                                                  HttpHeaders.PLAIN_ASCII_TEXT,
-                                                  "The subject".getBytes(StandardCharsets.US_ASCII));
-        assertThat(actionFactory.getAction(postRequest).execute(postRequest).getBodyAsString(StandardCharsets.US_ASCII))
-            .isEqualTo("Bien recu");
-
-        assertThat(actionFactory.getAction(getRequest).execute(getRequest).getBodyAsString(StandardCharsets.UTF_8))
-            .isEqualTo("The subject");
+    public void getActionShouldReturnSubjectActionForSubjectAndGet() throws IOException {
+        HttpRequest request = HttpRequest.get("/subject");
+        assertThat(actionFactory.getAction(request)).isInstanceOf(SubjectAction.class);
     }
 }

@@ -74,7 +74,7 @@ public class HttpServerTest {
     }
 
     @Test
-    public void serverShouldAnswerWithNoForStep4() throws IOException {
+    public void serverShouldAnswerWithNoForStep5() throws IOException {
         String result = Request.Get(ADDRESS + "?q=Est+ce+que+tu+reponds+toujours+oui(OUI/NON)")
                                .execute()
                                .returnContent()
@@ -83,7 +83,7 @@ public class HttpServerTest {
     }
 
     @Test
-    public void serverShouldAnswerWithWellReceivedAndStoreSUbjectForSubject() throws IOException {
+    public void serverShouldAnswerWithWellReceivedAndStoreSubjectForSubject() throws IOException {
         SubjectAction.reset();
         HttpResponse response = Request.Post(ADDRESS)
                                   .bodyString("The subject", ContentType.TEXT_PLAIN)
@@ -101,13 +101,23 @@ public class HttpServerTest {
     }
 
     @Test
+    public void serverShouldAnswerWithJSONForSkalaskel() throws IOException {
+        String result = Request.Get(ADDRESS + "scalaskel/change/100")
+                               .execute()
+                               .returnContent()
+                               .asString();
+        assertThat(result).startsWith("[{")
+                          .endsWith("}]");
+    }
+
+    @Test
     public void serverShouldAnswerWith400WhenNoQuestion() throws IOException {
         HttpResponse response = Request.Get(ADDRESS).execute().returnResponse();
         check400(response);
     }
 
     @Test
-    public void serverShouldAnswerWith404WhenNotHandlesPath() throws IOException {
+    public void serverShouldAnswerWith404WhenNotHandledPath() throws IOException {
         HttpResponse response = Request.Get(ADDRESS + "/hello").execute().returnResponse();
         check404(response);
     }

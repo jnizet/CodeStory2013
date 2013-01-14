@@ -16,6 +16,7 @@ import java.util.concurrent.atomic.AtomicReference;
 public class SubjectAction implements Action {
     public static final String WELL_RECEIVED = "Bien recu";
 
+
     private static final AtomicReference<HttpRequest> LAST_POST_REQUEST = new AtomicReference<>(null);
 
     @Override
