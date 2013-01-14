@@ -23,7 +23,6 @@ public class ArithmeticAction implements Action {
     public HttpResponse execute(HttpRequest request) throws IOException {
         String encodedExpression =
             request.getPathAndQueryString().substring(request.getPathAndQueryString().indexOf('=') + 1);
-
         try {
             ANTLRReaderStream input = new ANTLRReaderStream(new StringReader(encodedExpression.replace(',', '.')));
             MathLexer lexer = new MathLexer(input);

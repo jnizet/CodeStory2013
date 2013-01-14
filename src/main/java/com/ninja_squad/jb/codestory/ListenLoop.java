@@ -91,6 +91,7 @@ class ListenLoop implements Runnable {
                         response = createErrorResponse(e);
                     }
                     response.send(out);
+                    out.flush();
                 }
                 catch (IOException e) {
                     // too bad

@@ -93,7 +93,7 @@ public final class HttpResponse {
         writer.write(EOL);
         if (body.length > 0) {
             writer.write("Content-Length:");
-            writer.write(body.length);
+            writer.write(String.valueOf(body.length));
             writer.write(EOL);
         }
 
