@@ -55,6 +55,15 @@ public class HttpServerTest {
     }
 
     @Test
+    public void serverShouldAnswerWithYesForStep3() throws IOException {
+        String result = Request.Get(ADDRESS + "?q=Es+tu+heureux+de+participer(OUI/NON)")
+                               .execute()
+                               .returnContent()
+                               .asString();
+        assertThat(result).isEqualTo(RootAction.ARE_YOU_HAPPY_ANSWER);
+    }
+
+    @Test
     public void serverShouldAnswerWith400WhenNoQuestion() throws IOException {
         HttpResponse response = Request.Get(ADDRESS).execute().returnResponse();
         check400(response);

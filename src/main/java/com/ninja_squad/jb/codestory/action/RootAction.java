@@ -23,11 +23,15 @@ public class RootAction implements Action {
     public static final String MAILING_LIST_QUESTION = "Es tu abonne a la mailing list(OUI/NON)";
     public static final String MAILING_LIST_ANSWER = "OUI";
 
+    public static final String ARE_YOU_HAPPY_QUESTION = "Es tu heureux de participer(OUI/NON)";
+    public static final String ARE_YOU_HAPPY_ANSWER = "OUI";
+
     public static final String BAD_REQUEST_ANSWER = "Could you repeat the question?";
 
     public static final Map<String, String> ANSWERS_BY_QUESTION =
         ImmutableMap.<String, String>builder().put(EMAIL_ADDRESS_QUESTION, EMAIL_ADDRESS_ANSWER)
                                               .put(MAILING_LIST_QUESTION, MAILING_LIST_ANSWER)
+                                              .put(ARE_YOU_HAPPY_QUESTION, ARE_YOU_HAPPY_ANSWER)
                                               .build();
 
     @Override

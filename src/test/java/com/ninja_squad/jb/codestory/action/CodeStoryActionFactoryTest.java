@@ -47,4 +47,11 @@ public class CodeStoryActionFactoryTest {
         assertThat(actionFactory.getAction(request).execute(request).getBodyAsString(StandardCharsets.US_ASCII))
             .isEqualTo("OUI");
     }
+
+    @Test
+    public void getActionShouldReturnYesForStep3Question() throws IOException {
+        HttpRequest request = HttpRequest.get("/?q=Es+tu+heureux+de+participer(OUI/NON)");
+        assertThat(actionFactory.getAction(request).execute(request).getBodyAsString(StandardCharsets.US_ASCII))
+            .isEqualTo("OUI");
+    }
 }
