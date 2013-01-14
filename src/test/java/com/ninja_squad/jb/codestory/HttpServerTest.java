@@ -74,6 +74,15 @@ public class HttpServerTest {
     }
 
     @Test
+    public void serverShouldAnswerWithNoForStep4() throws IOException {
+        String result = Request.Get(ADDRESS + "?q=Est+ce+que+tu+reponds+toujours+oui(OUI/NON)")
+                               .execute()
+                               .returnContent()
+                               .asString();
+        assertThat(result).isEqualTo(RootAction.ALWAYS_YES_ANSWER);
+    }
+
+    @Test
     public void serverShouldAnswerWithWellReceivedAndStoreSUbjectForSubject() throws IOException {
         SubjectAction.reset();
         HttpResponse response = Request.Post(ADDRESS)

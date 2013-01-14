@@ -29,6 +29,9 @@ public class RootAction implements Action {
     public static final String READY_FOR_POST_QUESTION = "Es tu pret a recevoir une enonce au format markdown par http post(OUI/NON)";
     public static final String READY_FOR_POST_ANSWER = "OUI";
 
+    public static final String ALWAYS_YES_QUESTION = "Est ce que tu reponds toujours oui(OUI/NON)";
+    public static final String ALWAYS_YES_ANSWER = "NON";
+
     public static final String BAD_REQUEST_ANSWER = "Could you repeat the question?";
 
     public static final Map<String, String> ANSWERS_BY_QUESTION =
@@ -36,6 +39,7 @@ public class RootAction implements Action {
                                               .put(MAILING_LIST_QUESTION, MAILING_LIST_ANSWER)
                                               .put(ARE_YOU_HAPPY_QUESTION, ARE_YOU_HAPPY_ANSWER)
                                               .put(READY_FOR_POST_QUESTION, READY_FOR_POST_ANSWER)
+                                              .put(ALWAYS_YES_QUESTION, ALWAYS_YES_ANSWER)
                                               .build();
 
     @Override

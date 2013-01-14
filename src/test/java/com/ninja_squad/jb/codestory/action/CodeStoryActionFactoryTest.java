@@ -65,6 +65,13 @@ public class CodeStoryActionFactoryTest {
     }
 
     @Test
+    public void getActionShouldReturnYesForStep5Question() throws IOException {
+        HttpRequest request = HttpRequest.get("/?q=Est+ce+que+tu+reponds+toujours+oui(OUI/NON)");
+        assertThat(actionFactory.getAction(request).execute(request).getBodyAsString(StandardCharsets.US_ASCII))
+            .isEqualTo("NON");
+    }
+
+    @Test
     public void getActionShouldReturnWellReceivedForSubjectPost() throws IOException {
         SubjectAction.reset();
         HttpRequest getRequest = HttpRequest.get("/subject");
