@@ -43,7 +43,7 @@ public class CodeStoryActionFactoryTest {
 
     @Test
     public void getActionShouldReturnYesForStep2Question() throws IOException {
-        HttpRequest request = HttpRequest.get("/?q=Es+tu+abonne+a+la+mailing+list");
+        HttpRequest request = HttpRequest.get("/?q=Es+tu+abonne+a+la+mailing+list(OUI/NON)");
         assertThat(actionFactory.getAction(request).execute(request).getBodyAsString(StandardCharsets.US_ASCII))
             .isEqualTo("OUI");
     }

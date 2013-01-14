@@ -47,7 +47,7 @@ public class HttpServerTest {
 
     @Test
     public void serverShouldAnswerWithYesForStep2() throws IOException {
-        String result = Request.Get(ADDRESS + "?q=Es+tu+abonne+a+la+mailing+list")
+        String result = Request.Get(ADDRESS + "?q=Es+tu+abonne+a+la+mailing+list(OUI/NON)")
                                .execute()
                                .returnContent()
                                .asString();

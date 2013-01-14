@@ -20,7 +20,7 @@ public class RootAction implements Action {
     public static final String EMAIL_ADDRESS_QUESTION = "Quelle est ton adresse email";
     public static final String EMAIL_ADDRESS_ANSWER = "jb+codestory@ninja-squad.com";
 
-    public static final String MAILING_LIST_QUESTION = "Es tu abonne a la mailing list";
+    public static final String MAILING_LIST_QUESTION = "Es tu abonne a la mailing list(OUI/NON)";
     public static final String MAILING_LIST_ANSWER = "OUI";
 
     public static final String BAD_REQUEST_ANSWER = "Could you repeat the question?";
