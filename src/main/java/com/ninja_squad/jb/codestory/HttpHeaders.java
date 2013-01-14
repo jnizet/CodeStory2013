@@ -112,7 +112,7 @@ public final class HttpHeaders {
      * A builder for HTTP headers
      */
     public static final class Builder {
-        private Map<String, String> map = Maps.newHashMap();
+        private final Map<String, String> map = Maps.newHashMap();
         private ContentType contentType;
 
         private Builder() {

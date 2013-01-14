@@ -32,6 +32,9 @@ public class RootAction implements Action {
     public static final String ALWAYS_YES_QUESTION = "Est ce que tu reponds toujours oui(OUI/NON)";
     public static final String ALWAYS_YES_ANSWER = "NON";
 
+    public static final String SUBJECT_RECEIVED_QUESTION = "As tu bien recu le premier enonce(OUI/NON)";
+    public static final String SUBJECT_RECEIVED_ANSWER = "OUI";
+
     public static final String BAD_REQUEST_ANSWER = "Could you repeat the question?";
 
     public static final Map<String, String> ANSWERS_BY_QUESTION =
@@ -40,6 +43,7 @@ public class RootAction implements Action {
                                               .put(ARE_YOU_HAPPY_QUESTION, ARE_YOU_HAPPY_ANSWER)
                                               .put(READY_FOR_POST_QUESTION, READY_FOR_POST_ANSWER)
                                               .put(ALWAYS_YES_QUESTION, ALWAYS_YES_ANSWER)
+                                              .put(SUBJECT_RECEIVED_QUESTION, SUBJECT_RECEIVED_ANSWER)
                                               .build();
 
     @Override

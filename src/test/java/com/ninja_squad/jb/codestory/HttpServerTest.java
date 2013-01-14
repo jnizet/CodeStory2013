@@ -83,6 +83,15 @@ public class HttpServerTest {
     }
 
     @Test
+    public void serverShouldAnswerWithYesForStep6() throws IOException {
+        String result = Request.Get(ADDRESS + "?q=As+tu+bien+recu+le+premier+enonce(OUI/NON)")
+                               .execute()
+                               .returnContent()
+                               .asString();
+        assertThat(result).isEqualTo(RootAction.SUBJECT_RECEIVED_ANSWER);
+    }
+
+    @Test
     public void serverShouldAnswerWithWellReceivedAndStoreSubjectForSubject() throws IOException {
         SubjectAction.reset();
         HttpResponse response = Request.Post(ADDRESS)

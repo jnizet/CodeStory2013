@@ -54,4 +54,11 @@ public class RootActionTest {
         assertThat(new RootAction().execute(request).getBodyAsString(StandardCharsets.US_ASCII))
             .isEqualTo("NON");
     }
+
+    @Test
+    public void shouldReturnnoForStep6Question() throws IOException {
+        HttpRequest request = HttpRequest.get("/?q=As+tu+bien+recu+le+premier+enonce(OUI/NON)");
+        assertThat(new RootAction().execute(request).getBodyAsString(StandardCharsets.US_ASCII))
+            .isEqualTo("OUI");
+    }
 }
