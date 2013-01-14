@@ -1,15 +1,17 @@
 package com.ninja_squad.jb.codestory.action;
 
 import com.ninja_squad.jb.codestory.Action;
-import com.ninja_squad.jb.codestory.HttpHeaders;
 import com.ninja_squad.jb.codestory.HttpRequest;
 import com.ninja_squad.jb.codestory.HttpResponse;
+import org.antlr.runtime.ANTLRReaderStream;
+import org.antlr.runtime.CommonTokenStream;
 
-import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
-import javax.script.ScriptException;
-import java.io.UnsupportedEncodingException;
-import java.nio.charset.StandardCharsets;
+import java.io.IOException;
+import java.io.StringReader;
+import java.math.BigDecimal;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+import java.util.Locale;
 
 /**
  * Action used to parse and answer to non-URL-encoded arithmetic expression in the <code>q</code> parameter
@@ -18,19 +20,22 @@ import java.nio.charset.StandardCharsets;
 public class ArithmeticAction implements Action {
 
     @Override
-    public HttpResponse execute(HttpRequest request) throws UnsupportedEncodingException {
+    public HttpResponse execute(HttpRequest request) throws IOException {
         String encodedExpression =
             request.getPathAndQueryString().substring(request.getPathAndQueryString().indexOf('=') + 1);
-        // create a script engine manager
-        ScriptEngineManager factory = new ScriptEngineManager();
-        // create a JavaScript engine
-        ScriptEngine engine = factory.getEngineByName("JavaScript");
-        // evaluate JavaScript code from String
+
         try {
-            Object result = engine.eval(encodedExpression);
-            return HttpResponse.ok(result.toString());
+            ANTLRReaderStream input = new ANTLRReaderStream(new StringReader(encodedExpression.replace(',', '.')));
+            MathLexer lexer = new MathLexer(input);
+            CommonTokenStream tokens = new CommonTokenStream(lexer);
+            MathParser parser = new MathParser(tokens);
+            BigDecimal result = parser.expr();
+
+            DecimalFormat decimalFormat = new DecimalFormat("0.#", DecimalFormatSymbols.getInstance(Locale.FRENCH));
+            String formattedResult = decimalFormat.format(result);
+            return HttpResponse.ok(formattedResult);
         }
-        catch (ScriptException e) {
+        catch (Exception e) {
             return HttpResponse.badRequest("Invalid expression: " + encodedExpression);
         }
     }

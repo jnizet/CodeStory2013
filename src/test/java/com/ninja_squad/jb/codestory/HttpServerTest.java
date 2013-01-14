@@ -125,7 +125,7 @@ public class HttpServerTest {
                                .execute()
                                .returnContent()
                                .asString();
-        assertThat(result).isEqualTo("2.0");
+        assertThat(result).isEqualTo("2");
     }
 
     @Test
