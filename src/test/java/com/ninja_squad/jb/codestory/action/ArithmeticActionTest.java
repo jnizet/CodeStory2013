@@ -28,7 +28,8 @@ public class ArithmeticActionTest {
             .isEqualTo("2,5");
 
         request = HttpRequest.get("/?q=((1,1+2)+3,14+4+(5+6+7)+(8+9+10)*4267387833344334647677634)/2*553344300034334349999000");
-        System.out.println(new ArithmeticAction().execute(request).getBodyAsString(StandardCharsets.US_ASCII));
+        assertThat(new ArithmeticAction().execute(request).getBodyAsString(StandardCharsets.US_ASCII))
+            .isEqualTo("31878018903828899277492024491376690701584023926880");
 
         request = HttpRequest.get("/?q=-1,5+1");
         assertThat(new ArithmeticAction().execute(request).getBodyAsString(StandardCharsets.US_ASCII))
