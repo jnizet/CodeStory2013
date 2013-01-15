@@ -44,6 +44,16 @@ public class CodeStoryActionFactoryTest {
     }
 
     @Test
+    public void getActionShouldReturnJajascriptActionForJavjascriptChangePost() throws IOException {
+        HttpRequest request = new HttpRequest(HttpRequest.Method.POST,
+                                              "/jajascript/optimize",
+                                              HttpParameters.NO_PARAMETER,
+                                              HttpHeaders.NO_HEADER,
+                                              null);
+        assertThat(actionFactory.getAction(request)).isInstanceOf(JajascriptAction.class);
+    }
+
+    @Test
     public void getActionShouldReturnSubjectActionForPost() throws IOException {
         HttpRequest request = new HttpRequest(HttpRequest.Method.POST,
                                               "/",

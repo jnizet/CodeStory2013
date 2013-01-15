@@ -96,6 +96,10 @@ public class HttpRequest {
         return body;
     }
 
+    public String getBodyAsString() {
+        return new String(body, getContentCharset());
+    }
+
     public String getPathAndQueryString() {
         return pathAndQueryString;
     }

@@ -36,7 +36,7 @@ public class SubjectAction implements Action {
 
     private HttpResponse doPost(HttpRequest request) {
         LAST_POST_REQUEST.set(request);
-        String subject = new String(request.getBody(), request.getContentCharset());
+        String subject = request.getBodyAsString();
         System.out.println("Subject = " + subject);
         return new HttpResponse(HttpResponse.Status._201_CREATED,
                                 HttpHeaders.PLAIN_ASCII_TEXT,

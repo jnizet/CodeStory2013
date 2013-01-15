@@ -152,6 +152,17 @@ public class HttpServerTest {
     }
 
     @Test
+    public void serverShouldAnswerWithJSONForJajascript() throws IOException {
+        String result = Request.Post(ADDRESS + "jajascript/optimize")
+                               .bodyString("[{'VOL': 'A', 'DEPART': '0', 'DUREE': 5, 'PRIX': 10}]".replace('\'', '"'), ContentType.APPLICATION_JSON)
+                               .execute()
+                               .returnContent()
+                               .asString();
+        assertThat(result).startsWith("{")
+            .endsWith("}");
+    }
+
+    @Test
     public void serverShouldAnswerWith400WhenNoQuestion() throws IOException {
         HttpResponse response = Request.Get(ADDRESS).execute().returnResponse();
         check400(response);

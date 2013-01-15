@@ -57,6 +57,10 @@ public class CodeStoryActionFactory implements ActionFactory {
      */
     @Override
     public Action getAction(HttpRequest request) {
+        if (request.getMethod() == HttpRequest.Method.POST
+            && request.getPath().equals("/jajascript/optimize")) {
+            return new JajascriptAction();
+        }
         if (request.getMethod() == HttpRequest.Method.POST) {
             return new SubjectAction();
         }

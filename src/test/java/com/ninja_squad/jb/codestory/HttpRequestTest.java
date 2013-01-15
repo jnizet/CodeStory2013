@@ -40,7 +40,7 @@ public class HttpRequestTest {
              + "\r\n"
             + body).getBytes(StandardCharsets.US_ASCII);
         HttpRequest result = HttpRequest.parse(new ByteArrayInputStream(request));
-        assertThat(new String(result.getBody(), StandardCharsets.US_ASCII)).isEqualTo(body);
+        assertThat(result.getBodyAsString()).isEqualTo(body);
         assertThat(result.getHeaders().getHeader("host").get()).isEqualTo("localhost");
         assertThat(result.getPath()).isEqualTo("/somePath");
         assertThat(result.getParameters().asMap().asMap()).isEmpty();
