@@ -49,16 +49,23 @@ public class RootActionTest {
     }
 
     @Test
-    public void shouldReturnnoForStep5Question() throws IOException {
+    public void shouldReturnNoForStep5Question() throws IOException {
         HttpRequest request = HttpRequest.get("/?q=Est+ce+que+tu+reponds+toujours+oui(OUI/NON)");
         assertThat(new RootAction().execute(request).getBodyAsString(StandardCharsets.US_ASCII))
             .isEqualTo("NON");
     }
 
     @Test
-    public void shouldReturnnoForStep6Question() throws IOException {
+    public void shouldReturnYesForStep6Question() throws IOException {
         HttpRequest request = HttpRequest.get("/?q=As+tu+bien+recu+le+premier+enonce(OUI/NON)");
         assertThat(new RootAction().execute(request).getBodyAsString(StandardCharsets.US_ASCII))
             .isEqualTo("OUI");
+    }
+
+    @Test
+    public void shouldReturnBofForGoodNightQuestion() throws IOException {
+        HttpRequest request = HttpRequest.get("/?q=As+tu+passe+une+bonne+nuit+malgre+les+bugs+de+l+etape+precedente(PAS_TOP/BOF/QUELS_BUGS)");
+        assertThat(new RootAction().execute(request).getBodyAsString(StandardCharsets.US_ASCII))
+            .isEqualTo("BOF");
     }
 }

@@ -92,6 +92,15 @@ public class HttpServerTest {
     }
 
     @Test
+    public void serverShouldAnswerWithBofForGoodNight() throws IOException {
+        String result = Request.Get(ADDRESS + "?q=As+tu+passe+une+bonne+nuit+malgre+les+bugs+de+l+etape+precedente(PAS_TOP/BOF/QUELS_BUGS)")
+                               .execute()
+                               .returnContent()
+                               .asString();
+        assertThat(result).isEqualTo(RootAction.GOOD_NIGHT_ANSWER);
+    }
+
+    @Test
     public void serverShouldAnswerWithWellReceivedAndStoreSubjectForSubject() throws IOException {
         SubjectAction.reset();
         HttpResponse response = Request.Post(ADDRESS)
