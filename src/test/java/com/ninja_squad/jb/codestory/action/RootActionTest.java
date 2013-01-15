@@ -68,4 +68,11 @@ public class RootActionTest {
         assertThat(new RootAction().execute(request).getBodyAsString(StandardCharsets.US_ASCII))
             .isEqualTo("BOF");
     }
+
+    @Test
+    public void shouldReturnYesForSubject2Question() throws IOException {
+        HttpRequest request = HttpRequest.get("/?q=As+tu+bien+recu+le+second+enonce(OUI/NON)");
+        assertThat(new RootAction().execute(request).getBodyAsString(StandardCharsets.US_ASCII))
+            .isEqualTo("OUI");
+    }
 }

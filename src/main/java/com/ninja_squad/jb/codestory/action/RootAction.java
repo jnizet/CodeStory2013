@@ -36,6 +36,9 @@ public class RootAction implements Action {
     public static final String GOOD_NIGHT_QUESTION = "As tu passe une bonne nuit malgre les bugs de l etape precedente(PAS_TOP/BOF/QUELS_BUGS)";
     public static final String GOOD_NIGHT_ANSWER = "BOF";
 
+    public static final String SUBJECT2_RECEIVED_QUESTION = "As tu bien recu le second enonce(OUI/NON)";
+    public static final String SUBJECT2_RECEIVED_ANSWER = "OUI";
+
     public static final String BAD_REQUEST_ANSWER = "Could you repeat the question?";
 
     public static final Map<String, String> ANSWERS_BY_QUESTION =
@@ -46,6 +49,7 @@ public class RootAction implements Action {
                                               .put(ALWAYS_YES_QUESTION, ALWAYS_YES_ANSWER)
                                               .put(SUBJECT_RECEIVED_QUESTION, SUBJECT_RECEIVED_ANSWER)
                                               .put(GOOD_NIGHT_QUESTION, GOOD_NIGHT_ANSWER)
+                                              .put(SUBJECT2_RECEIVED_QUESTION, SUBJECT2_RECEIVED_ANSWER)
                                               .build();
 
     @Override
