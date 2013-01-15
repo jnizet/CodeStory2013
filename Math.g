@@ -18,15 +18,21 @@ expr returns [BigDecimal value]
     ;
 
 multExpr returns [BigDecimal value]
-    :   e = atom {$value = $e.value;} 
-        ('*' e = atom {$value = $value.multiply($e.value);}
-        |'/' e = atom {$value = $value.divide($e.value, 10, RoundingMode.HALF_UP);}
+    :   e = unaryExpr {$value = $e.value;} 
+        ('*' e = unaryExpr {$value = $value.multiply($e.value);}
+        |'/' e = unaryExpr {$value = $value.divide($e.value, 10, RoundingMode.HALF_UP);}
         )*
     ; 
+
+unaryExpr returns [BigDecimal value]
+    :   e = atom {$value = $e.value;}
+    |   '-' e = atom {$value = $e.value.negate();}
+    ;
 
 atom returns [BigDecimal value]
     :   FLOAT {$value = new BigDecimal($FLOAT.text);}
     |   '(' expr ')' {$value = $expr.value;}
     ;
 
-FLOAT :   '0'..'9'+ '.' '0'..'9'+ | '0'..'9'+;
+FLOAT :   '0'..'9'+ '.' '0'..'9'+ 
+          | '0'..'9'+;
