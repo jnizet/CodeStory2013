@@ -2,6 +2,7 @@ package com.ninja_squad.jb.codestory;
 
 import com.google.common.io.ByteStreams;
 import com.ninja_squad.jb.codestory.action.CodeStoryActionFactory;
+import com.ninja_squad.jb.codestory.action.JajascriptActionTest;
 import com.ninja_squad.jb.codestory.action.RootAction;
 import com.ninja_squad.jb.codestory.action.SubjectAction;
 import org.apache.http.HttpResponse;
@@ -23,6 +24,7 @@ import static org.fest.assertions.Assertions.*;
 public class HttpServerTest {
     private static final int PORT = 56789;
     private static final String ADDRESS = "http://localhost:" + PORT + "/";
+    // private static final String ADDRESS = "http://codestory.jnizet.cloudbees.net/";
 
     private static HttpServer httpServer;
 
@@ -153,8 +155,9 @@ public class HttpServerTest {
 
     @Test
     public void serverShouldAnswerWithJSONForJajascript() throws IOException {
+        String json = JajascriptActionTest.generateJajascriptJSON(10000);
         String result = Request.Post(ADDRESS + "jajascript/optimize")
-                               .bodyString("[{'VOL': 'A', 'DEPART': '0', 'DUREE': 5, 'PRIX': 10}]".replace('\'', '"'), ContentType.APPLICATION_JSON)
+                               .bodyString(json, ContentType.APPLICATION_JSON)
                                .execute()
                                .returnContent()
                                .asString();

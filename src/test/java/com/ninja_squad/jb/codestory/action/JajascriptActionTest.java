@@ -64,29 +64,19 @@ public class JajascriptActionTest {
 
     @Test
     public void testPerf() throws IOException {
-        testIteration();
+        for (int i = 0; i< 10; i++) {
+            testIteration();
+        }
     }
 
     private void testIteration() throws IOException {
-        Random random = new Random();
-        JSONArray array = new JSONArray();
         for (int number = 1; number < 10001; number *= 10) {
-            for (int i = 0; i < number; i++) {
-                int start = random.nextInt(23);
-                int duration = 1 + random.nextInt(24 - start);
-                JSONObject o = new JSONObject();
-                o.put("VOL", String.valueOf(i + 1));
-                o.put("DEPART", start);
-                o.put("DUREE", duration);
-                o.put("PRIX", random.nextInt(21) + 1);
-                array.add(o);
-            }
-
+            String jsonString = generateJajascriptJSON(number);
             HttpRequest request = new HttpRequest(HttpRequest.Method.POST,
                                                   "/jajascript/optimize",
                                                   HttpParameters.NO_PARAMETER,
                                                   HttpHeaders.PLAIN_ASCII_TEXT,
-                                                  array.toJSONString().getBytes(StandardCharsets.US_ASCII));
+                                                  jsonString.getBytes(StandardCharsets.US_ASCII));
             Action action1 = new JajascriptAction();
 
             Stopwatch stopwatch = new Stopwatch();
@@ -96,5 +86,22 @@ public class JajascriptActionTest {
             System.out.println("For " + number + ", result = " + stopwatch.elapsed(TimeUnit.MICROSECONDS) + "µs.");
             System.out.println("Result = " + response.getBodyAsString(StandardCharsets.US_ASCII));
         }
+    }
+
+    public static String generateJajascriptJSON(int number) {
+        Random random = new Random();
+        JSONArray array = new JSONArray();
+        for (int i = 0; i < number; i++) {
+            int start = random.nextInt(23);
+            int duration = 1 + random.nextInt(24 - start);
+            JSONObject o = new JSONObject();
+            o.put("VOL", String.valueOf(i + 1));
+            o.put("DEPART", start);
+            o.put("DUREE", duration);
+            o.put("PRIX", random.nextInt(21) + 1);
+            array.add(o);
+        }
+
+        return array.toJSONString();
     }
 }
