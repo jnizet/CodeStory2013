@@ -13,14 +13,15 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.NavigableSet;
+import java.util.Set;
+import java.util.TreeSet;
 
 /**
  * Computes the best planning
@@ -30,14 +31,13 @@ public class JajascriptAction implements Action {
 
     @Override
     public HttpResponse execute(HttpRequest request) {
-        byte[] body = request.getBody();
+        String body = request.getBodyAsString();
         try {
-            Flight[] flights = unmarshal(request);
+            Flight[] flights = unmarshal(body);
             Path result = findBestPath(flights);
-            HttpResponse response = new HttpResponse(HttpResponse.Status._201_CREATED,
+            return new HttpResponse(HttpResponse.Status._201_CREATED,
                                     HttpHeaders.builder().setContentType("application/json", StandardCharsets.US_ASCII).build(),
                                     marshal(result).getBytes(StandardCharsets.US_ASCII));
-            return response;
         }
         catch (Exception e) {
             return HttpResponse.badRequest("Invalid data: " + body);
@@ -47,10 +47,9 @@ public class JajascriptAction implements Action {
     /**
      * Transforms a JSON-encoded array of flights into an array of Flight instances
      */
-    private Flight[] unmarshal(HttpRequest request) throws ParseException, IOException {
+    private Flight[] unmarshal(String s) throws ParseException {
         JSONParser parser = new JSONParser();
-        List<Map<String, Object>> array =
-            (List<Map<String, Object>>) parser.parse(new InputStreamReader(new ByteArrayInputStream(request.getBody()), request.getContentCharset()));
+        List<Map<String, Object>> array = (List<Map<String, Object>>) parser.parse(s);
         Flight[] flights = new Flight[array.size()];
         int i = 0;
         for (Map<String, Object> o : array) {
@@ -104,34 +103,47 @@ public class JajascriptAction implements Action {
      */
     public Path findBestPath(Flight[] flights) {
         // sort
-        Arrays.sort(flights, new ByDescendingStartTimeComparator());
+        Arrays.sort(flights, ByDescendingStartTimeComparator.INSTANCE);
+
 
         // create the graph
-        for (int i = 0; i < flights.length; i++) {
-            Flight flight = flights[i];
-            for (int j = i + 1; j < flights.length; j++) {
-                Flight parent = flights[j];
-                if (flight.acceptAsParent(parent)) {
-                    flight.addParent(parent);
-                }
-            }
-        }
+        createGraph(flights);
 
         // find the leaves
-        Iterable<Flight> leaves = FluentIterable.from(Arrays.asList(flights)).filter(new Predicate<Flight>() {
-            @Override
-            public boolean apply(Flight input) {
-                return input.isLeaf();
-            }
-        });
+        Iterable<Flight> leaves = FluentIterable.from(Arrays.asList(flights)).filter(LeafPredicate.INSTANCE);
 
         // get the best flight out of the leaves
         Flight bestFlight = getBestFlight(leaves);
 
         // create a path from the best leaf
-        Path result = createPath(bestFlight);
+        return createPath(bestFlight);
+    }
 
-        return result;
+    private void createGraph(Flight[] flights) {
+        NavigableSet<Flight> flightsSortedByEndAndDuration =
+            new TreeSet<>(ByEndDateAndDurationComparator.INSTANCE);
+        for (Flight f : flights) {
+            flightsSortedByEndAndDuration.add(f);
+        }
+
+        Flight fake = new Flight("fake", 0, -1, 0);
+        for (Flight flight: flights) {
+            fake.setEndTime(flight.getStartTime());
+
+            Set<Flight> parents = flightsSortedByEndAndDuration.tailSet(fake, false);
+            int biggestStartTimeInParents = Integer.MIN_VALUE;
+            for (Flight parent : parents) {
+                if (parent.getEndTime() > biggestStartTimeInParents) {
+                    flight.addParent(parent);
+                    if (parent.getStartTime() > biggestStartTimeInParents) {
+                        biggestStartTimeInParents = parent.getStartTime();
+                    }
+                }
+                else {
+                    break;
+                }
+            }
+        }
     }
 
     private Path createPath(Flight flight) {
@@ -171,7 +183,7 @@ public class JajascriptAction implements Action {
     }
 
     protected static class Path {
-        private List<Flight> path = Lists.newArrayList();
+        private final List<Flight> path;
         private final int gain;
 
         public Path(List<Flight> path, int gain) {
@@ -197,6 +209,7 @@ public class JajascriptAction implements Action {
         private final String name;
         private final int startTime;
         private final int duration;
+        private int endTime;
         private final int price;
         private boolean leaf = true;
 
@@ -211,20 +224,20 @@ public class JajascriptAction implements Action {
             this.name = name;
             this.startTime = startTime;
             this.duration = duration;
+            this.endTime = startTime + duration;
             this.price = price;
         }
 
         public int getEndTime() {
-            return startTime + duration;
+            return endTime;
+        }
+
+        public void setEndTime(int endTime) {
+            this.endTime = endTime;
         }
 
         public boolean isLeaf() {
             return leaf;
-        }
-
-        public boolean acceptAsParent(Flight flight) {
-            return flight.getEndTime() <= this.startTime
-                && (parents.isEmpty() || parents.get(0).startTime < flight.getEndTime());
         }
 
         public void addParent(Flight flight) {
@@ -277,9 +290,36 @@ public class JajascriptAction implements Action {
     }
 
     private static class ByDescendingStartTimeComparator extends Ordering<Flight> {
+        public static final ByDescendingStartTimeComparator INSTANCE = new ByDescendingStartTimeComparator();
+
         @Override
         public int compare(Flight left, Flight right) {
             return -Integer.compare(left.getStartTime(), right.getStartTime());
+        }
+    }
+
+    private static class LeafPredicate implements Predicate<Flight> {
+        public static final LeafPredicate INSTANCE = new LeafPredicate();
+
+        @Override
+        public boolean apply(Flight input) {
+            return input.isLeaf();
+        }
+    }
+
+    private static class ByEndDateAndDurationComparator implements Comparator<Flight> {
+        public static final ByEndDateAndDurationComparator INSTANCE = new ByEndDateAndDurationComparator();
+
+        @Override
+        public int compare(Flight o1, Flight o2) {
+            int r = -Integer.compare(o1.getEndTime(), o2.getEndTime());
+            if (r == 0) {
+                r = Integer.compare(o1.getDuration(), o2.getDuration());
+            }
+            if (r == 0) {
+                r = Integer.compare(System.identityHashCode(o1), System.identityHashCode(o2));
+            }
+            return r;
         }
     }
 }

@@ -2,6 +2,7 @@ package com.ninja_squad.jb.codestory.action;
 
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.Lists;
+import com.ninja_squad.jb.codestory.Action;
 import com.ninja_squad.jb.codestory.HttpHeaders;
 import com.ninja_squad.jb.codestory.HttpParameters;
 import com.ninja_squad.jb.codestory.HttpRequest;
@@ -12,6 +13,7 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.junit.Test;
 
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Random;
@@ -61,11 +63,11 @@ public class JajascriptActionTest {
     }
 
     @Test
-    public void testPerf() {
+    public void testPerf() throws IOException {
         testIteration();
     }
 
-    private void testIteration() {
+    private void testIteration() throws IOException {
         Random random = new Random();
         JSONArray array = new JSONArray();
         for (int number = 1; number < 10001; number *= 10) {
@@ -79,18 +81,20 @@ public class JajascriptActionTest {
                 o.put("PRIX", random.nextInt(21) + 1);
                 array.add(o);
             }
-            JajascriptAction action = new JajascriptAction();
+
             HttpRequest request = new HttpRequest(HttpRequest.Method.POST,
                                                   "/jajascript/optimize",
                                                   HttpParameters.NO_PARAMETER,
                                                   HttpHeaders.PLAIN_ASCII_TEXT,
                                                   array.toJSONString().getBytes(StandardCharsets.US_ASCII));
+            Action action1 = new JajascriptAction();
+
             Stopwatch stopwatch = new Stopwatch();
             stopwatch.start();
-            HttpResponse response = action.execute(request);
+            HttpResponse response = action1.execute(request);
             stopwatch.stop();
-            System.out.println("For " + number + ", result = " + stopwatch.elapsed(TimeUnit.MICROSECONDS) + "Âµs.");
-            System.out.println("result = " + response.getBodyAsString(StandardCharsets.US_ASCII));
+            System.out.println("For " + number + ", result = " + stopwatch.elapsed(TimeUnit.MICROSECONDS) + "µs.");
+            System.out.println("Result = " + response.getBodyAsString(StandardCharsets.US_ASCII));
         }
     }
 }
