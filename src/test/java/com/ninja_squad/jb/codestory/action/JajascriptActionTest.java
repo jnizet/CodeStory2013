@@ -13,7 +13,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import static com.ninja_squad.jb.codestory.action.JajascriptAction.*;
-import static org.fest.assertions.Assertions.assertThat;
+import static org.fest.assertions.Assertions.*;
 
 /**
  * Tests for Jajascript action
@@ -37,6 +37,7 @@ public class JajascriptActionTest {
                                               HttpHeaders.PLAIN_ASCII_TEXT,
                                               json.getBytes(StandardCharsets.US_ASCII));
         HttpResponse response = new JajascriptAction().execute(request);
+        assertThat(response.getStatus()).isEqualTo(HttpResponse.Status._201_CREATED);
         assertThat(response.getHeaders().getContentType().get().getName()).isEqualTo("application/json");
         new JSONParser().parse(response.getBodyAsString(StandardCharsets.US_ASCII));
     }
@@ -49,7 +50,7 @@ public class JajascriptActionTest {
                                                                    new JajascriptAction.Flight("D", 9, 2, 10),
                                                                    new JajascriptAction.Flight("E", 12, 1, 10),
                                                                    new JajascriptAction.Flight("F", 4, 9, 40));
-        Path bestPath = new JajascriptAction().findBestPath(flights);
+        Path bestPath = new JajascriptAction().findBestPath(flights.toArray(new Flight[flights.size()]));
         assertThat(bestPath.getGain()).isEqualTo(41);
         assertThat(bestPath.getPath()).onProperty("name").containsExactly("A", "B", "E");
     }
