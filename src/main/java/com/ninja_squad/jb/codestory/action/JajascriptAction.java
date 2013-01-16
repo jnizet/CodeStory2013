@@ -165,7 +165,7 @@ public class JajascriptAction implements Action {
 
     protected static class Path {
         private List<Flight> path = Lists.newArrayList();
-        private int gain;
+        private final int gain;
 
         public Path(List<Flight> path, int gain) {
             this.path = path;
@@ -187,10 +187,10 @@ public class JajascriptAction implements Action {
     }
 
     protected static class Flight {
-        private String name;
-        private int startTime;
-        private int duration;
-        private int price;
+        private final String name;
+        private final int startTime;
+        private final int duration;
+        private final int price;
         private boolean leaf = true;
 
         private boolean bestGainComputed;
@@ -198,7 +198,7 @@ public class JajascriptAction implements Action {
         private Flight bestParent;
 
         // direct parents, sorted by descending start time
-        private List<Flight> parents = Lists.newArrayList();
+        private final List<Flight> parents = Lists.newArrayList();
 
         public Flight(String name, int startTime, int duration, int price) {
             this.name = name;
