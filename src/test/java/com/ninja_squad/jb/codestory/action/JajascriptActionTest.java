@@ -1,16 +1,21 @@
 package com.ninja_squad.jb.codestory.action;
 
+import com.google.common.base.Stopwatch;
 import com.google.common.collect.Lists;
 import com.ninja_squad.jb.codestory.HttpHeaders;
 import com.ninja_squad.jb.codestory.HttpParameters;
 import com.ninja_squad.jb.codestory.HttpRequest;
 import com.ninja_squad.jb.codestory.HttpResponse;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.junit.Test;
 
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Random;
+import java.util.concurrent.TimeUnit;
 
 import static com.ninja_squad.jb.codestory.action.JajascriptAction.*;
 import static org.fest.assertions.Assertions.*;
@@ -44,14 +49,48 @@ public class JajascriptActionTest {
 
     @Test
     public void shouldReturnBestPath() {
-        List<JajascriptAction.Flight> flights = Lists.newArrayList(new JajascriptAction.Flight("A", 0, 5, 10),
-                                                                   new JajascriptAction.Flight("B", 6, 4, 21),
-                                                                   new JajascriptAction.Flight("C", 8, 1, 10),
-                                                                   new JajascriptAction.Flight("D", 9, 2, 10),
-                                                                   new JajascriptAction.Flight("E", 12, 1, 10),
-                                                                   new JajascriptAction.Flight("F", 4, 9, 40));
+        List<JajascriptAction.Flight> flights = Lists.newArrayList(new Flight("A", 0, 5, 10),
+                                                                   new Flight("B", 6, 4, 21),
+                                                                   new Flight("C", 8, 1, 10),
+                                                                   new Flight("D", 9, 2, 10),
+                                                                   new Flight("E", 12, 1, 10),
+                                                                   new Flight("F", 4, 9, 40));
         Path bestPath = new JajascriptAction().findBestPath(flights.toArray(new Flight[flights.size()]));
         assertThat(bestPath.getGain()).isEqualTo(41);
         assertThat(bestPath.getPath()).onProperty("name").containsExactly("A", "B", "E");
+    }
+
+    @Test
+    public void testPerf() {
+        testIteration();
+    }
+
+    private void testIteration() {
+        Random random = new Random();
+        JSONArray array = new JSONArray();
+        for (int number = 1; number < 10001; number *= 10) {
+            for (int i = 0; i < number; i++) {
+                int start = random.nextInt(23);
+                int duration = 1 + random.nextInt(24 - start);
+                JSONObject o = new JSONObject();
+                o.put("VOL", String.valueOf(i + 1));
+                o.put("DEPART", start);
+                o.put("DUREE", duration);
+                o.put("PRIX", random.nextInt(21) + 1);
+                array.add(o);
+            }
+            JajascriptAction action = new JajascriptAction();
+            HttpRequest request = new HttpRequest(HttpRequest.Method.POST,
+                                                  "/jajascript/optimize",
+                                                  HttpParameters.NO_PARAMETER,
+                                                  HttpHeaders.PLAIN_ASCII_TEXT,
+                                                  array.toJSONString().getBytes(StandardCharsets.US_ASCII));
+            Stopwatch stopwatch = new Stopwatch();
+            stopwatch.start();
+            HttpResponse response = action.execute(request);
+            stopwatch.stop();
+            System.out.println("For " + number + ", result = " + stopwatch.elapsed(TimeUnit.MICROSECONDS) + "µs.");
+            System.out.println("result = " + response.getBodyAsString(StandardCharsets.US_ASCII));
+        }
     }
 }

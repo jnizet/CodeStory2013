@@ -13,6 +13,9 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -27,13 +30,14 @@ public class JajascriptAction implements Action {
 
     @Override
     public HttpResponse execute(HttpRequest request) {
-        String body = request.getBodyAsString();
+        byte[] body = request.getBody();
         try {
-            Flight[] flights = unmarshal(body);
+            Flight[] flights = unmarshal(request);
             Path result = findBestPath(flights);
-            return new HttpResponse(HttpResponse.Status._201_CREATED,
+            HttpResponse response = new HttpResponse(HttpResponse.Status._201_CREATED,
                                     HttpHeaders.builder().setContentType("application/json", StandardCharsets.US_ASCII).build(),
                                     marshal(result).getBytes(StandardCharsets.US_ASCII));
+            return response;
         }
         catch (Exception e) {
             return HttpResponse.badRequest("Invalid data: " + body);
@@ -43,9 +47,10 @@ public class JajascriptAction implements Action {
     /**
      * Transforms a JSON-encoded array of flights into an array of Flight instances
      */
-    private Flight[] unmarshal(String s) throws ParseException {
+    private Flight[] unmarshal(HttpRequest request) throws ParseException, IOException {
         JSONParser parser = new JSONParser();
-        List<Map<String, Object>> array = (List<Map<String, Object>>) parser.parse(s);
+        List<Map<String, Object>> array =
+            (List<Map<String, Object>>) parser.parse(new InputStreamReader(new ByteArrayInputStream(request.getBody()), request.getContentCharset()));
         Flight[] flights = new Flight[array.size()];
         int i = 0;
         for (Map<String, Object> o : array) {
@@ -124,7 +129,9 @@ public class JajascriptAction implements Action {
         Flight bestFlight = getBestFlight(leaves);
 
         // create a path from the best leaf
-        return createPath(bestFlight);
+        Path result = createPath(bestFlight);
+
+        return result;
     }
 
     private Path createPath(Flight flight) {
@@ -257,10 +264,6 @@ public class JajascriptAction implements Action {
 
         public Flight getBestParent() {
             return bestParent;
-        }
-
-        public void setBestParent(Flight bestParent) {
-            this.bestParent = bestParent;
         }
 
         @Override
