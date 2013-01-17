@@ -24,7 +24,7 @@ import static org.fest.assertions.Assertions.*;
 public class HttpServerTest {
     private static final int PORT = 56789;
     private static final String ADDRESS = "http://localhost:" + PORT + "/";
-    // private static final String ADDRESS = "http://codestory.jnizet.cloudbees.net/";
+    //private static final String ADDRESS = "http://codestory.jnizet.cloudbees.net/";
 
     private static HttpServer httpServer;
 

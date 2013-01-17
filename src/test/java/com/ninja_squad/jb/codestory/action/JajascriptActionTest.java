@@ -2,6 +2,7 @@ package com.ninja_squad.jb.codestory.action;
 
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.ninja_squad.jb.codestory.Action;
 import com.ninja_squad.jb.codestory.ContentTypes;
 import com.ninja_squad.jb.codestory.HttpHeaders;
@@ -17,6 +18,7 @@ import org.junit.Test;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
@@ -61,6 +63,46 @@ public class JajascriptActionTest {
         Path bestPath = new JajascriptAction().findBestPath(flights.toArray(new Flight[flights.size()]));
         assertThat(bestPath.getGain()).isEqualTo(41);
         assertThat(bestPath.getPath()).onProperty("name").containsExactly("A", "B", "E");
+
+        flights = Lists.newArrayList(new Flight("A", 0, 5, 10),
+                                     new Flight("B", 5, 5, 10),
+                                     new Flight("C", 5, 5, 30),
+                                     new Flight("D", 5, 5, 20),
+                                     new Flight("E", 10, 3, 10),
+                                     new Flight("F", 13, 9, 40));
+        bestPath = new JajascriptAction().findBestPath(flights.toArray(new Flight[flights.size()]));
+        assertThat(bestPath.getGain()).isEqualTo(90);
+        assertThat(bestPath.getPath()).onProperty("name").containsExactly("A", "C", "E", "F");
+    }
+
+    @Test
+    public void shouldCorrectPath() {
+        List<JajascriptAction.Flight> flights = Lists.newArrayList();
+        Map<String, Flight> flightsByName = Maps.newHashMap();
+        Random random = new Random();
+        for (int i = 0; i < 10000; i++) {
+            int start = random.nextInt(23);
+            int duration = 1 + random.nextInt(24 - start);
+            Flight f = new Flight(String.valueOf(i + 1), start, duration, random.nextInt(21) + 1);
+            flights.add(f);
+            flightsByName.put(f.getName(), f);
+        }
+
+        Path bestPath = new JajascriptAction().findBestPath(flights.toArray(new Flight[flights.size()]));
+
+        for (int i = 1; i < bestPath.getPath().size(); i++) {
+            Flight f = bestPath.getPath().get(i);
+            Flight before = bestPath.getPath().get(i - 1);
+            assertThat(before.getStartTime() + before.getDuration() <= f.getStartTime());
+        }
+
+        /*
+        Collections.sort(flights, ByDescendingStartTimeComparator.INSTANCE);
+        for (Flight f : flights) {
+            System.out.println(f);
+        }
+        System.out.println("bestPath = " + bestPath);
+        */
     }
 
     @Test

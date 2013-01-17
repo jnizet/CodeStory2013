@@ -1,7 +1,10 @@
 package com.ninja_squad.jb.codestory.action;
 
+import com.google.common.base.Function;
+import com.google.common.base.Objects;
 import com.google.common.base.Predicate;
 import com.google.common.collect.FluentIterable;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Ordering;
 import com.ninja_squad.jb.codestory.Action;
@@ -14,6 +17,7 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
+import javax.annotation.Nullable;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -208,6 +212,14 @@ public class JajascriptAction implements Action {
     }
 
     protected static class Flight {
+        private static Function<Flight, String> TO_NAME = new Function<Flight, String>() {
+            @Nullable
+            @Override
+            public String apply(Flight input) {
+                return input.getName();
+            }
+        };
+
         private final String name;
         private final int startTime;
         private final int duration;
@@ -283,15 +295,27 @@ public class JajascriptAction implements Action {
 
         @Override
         public String toString() {
-            return name;
+            return Objects.toStringHelper(this)
+                          .add("name", name)
+                          .add("startTime", startTime)
+                          .add("duration", duration)
+                          .add("endTime", endTime)
+                          .add("price", price)
+                          .add("leaf", leaf)
+                          .add("bestGain", bestGain)
+                          .add("bestParent", bestParent == null ? null : bestParent.getName())
+                          .add("parents", Lists.newArrayList(Iterables.transform(parents, TO_NAME)))
+                          .toString();
         }
 
         public boolean isBestGainComputed() {
             return bestGainComputed;
         }
+
+
     }
 
-    private static class ByDescendingStartTimeComparator extends Ordering<Flight> {
+    protected static class ByDescendingStartTimeComparator extends Ordering<Flight> {
         public static final ByDescendingStartTimeComparator INSTANCE = new ByDescendingStartTimeComparator();
 
         @Override
