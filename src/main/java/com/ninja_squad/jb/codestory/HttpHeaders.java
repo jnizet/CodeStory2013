@@ -22,7 +22,8 @@ public final class HttpHeaders {
 
     public static final HttpHeaders NO_HEADER = new HttpHeaders(Collections.<String, String>emptyMap());
     public static final HttpHeaders PLAIN_ASCII_TEXT =
-        new HttpHeaders(ImmutableMap.of(HttpHeaders.CONTENT_TYPE, "text/plain; charset=us-ascii"));
+        new HttpHeaders(ImmutableMap.of(HttpHeaders.CONTENT_TYPE,
+                                        ContentTypes.TEXT_PLAIN + "; charset=us-ascii"));
 
     private final Map<String, String> map;
     private final Optional<ContentType> contentType;

@@ -6,11 +6,11 @@ import com.google.common.base.Joiner;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Sets;
 import com.ninja_squad.jb.codestory.Action;
+import com.ninja_squad.jb.codestory.ContentTypes;
 import com.ninja_squad.jb.codestory.HttpHeaders;
 import com.ninja_squad.jb.codestory.HttpRequest;
 import com.ninja_squad.jb.codestory.HttpResponse;
 
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 import java.util.Set;
@@ -22,7 +22,7 @@ import java.util.Set;
 public class SkalaskelAction implements Action {
 
     @Override
-    public HttpResponse execute(HttpRequest request) throws IOException {
+    public HttpResponse execute(HttpRequest request) {
         String amountAsString = request.getPath().substring(request.getPath().lastIndexOf('/') + 1);
         try {
             int amount = Integer.parseInt(amountAsString);
@@ -44,7 +44,7 @@ public class SkalaskelAction implements Action {
         builder.append(']');
         return new HttpResponse(HttpResponse.Status._200_OK,
                                 HttpHeaders.builder()
-                                           .setContentType("application/json", StandardCharsets.US_ASCII)
+                                           .setContentType(ContentTypes.APPLICATION_JSON, StandardCharsets.US_ASCII)
                                            .build(),
                                 builder.toString().getBytes(StandardCharsets.US_ASCII));
     }

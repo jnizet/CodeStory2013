@@ -5,6 +5,7 @@ import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Ordering;
 import com.ninja_squad.jb.codestory.Action;
+import com.ninja_squad.jb.codestory.ContentTypes;
 import com.ninja_squad.jb.codestory.HttpHeaders;
 import com.ninja_squad.jb.codestory.HttpRequest;
 import com.ninja_squad.jb.codestory.HttpResponse;
@@ -36,7 +37,8 @@ public class JajascriptAction implements Action {
             Flight[] flights = unmarshal(body);
             Path result = findBestPath(flights);
             return new HttpResponse(HttpResponse.Status._201_CREATED,
-                                    HttpHeaders.builder().setContentType("application/json", StandardCharsets.US_ASCII).build(),
+                                    HttpHeaders.builder().setContentType(ContentTypes.APPLICATION_JSON,
+                                                                         StandardCharsets.US_ASCII).build(),
                                     marshal(result).getBytes(StandardCharsets.US_ASCII));
         }
         catch (Exception e) {
@@ -294,7 +296,7 @@ public class JajascriptAction implements Action {
 
         @Override
         public int compare(Flight left, Flight right) {
-            return -Integer.compare(left.getStartTime(), right.getStartTime());
+            return Integer.compare(right.getStartTime(), left.getStartTime());
         }
     }
 
@@ -312,7 +314,7 @@ public class JajascriptAction implements Action {
 
         @Override
         public int compare(Flight o1, Flight o2) {
-            int r = -Integer.compare(o1.getEndTime(), o2.getEndTime());
+            int r = Integer.compare(o2.getEndTime(), o1.getEndTime());
             if (r == 0) {
                 r = Integer.compare(o1.getDuration(), o2.getDuration());
             }

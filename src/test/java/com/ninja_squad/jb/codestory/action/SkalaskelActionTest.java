@@ -1,5 +1,6 @@
 package com.ninja_squad.jb.codestory.action;
 
+import com.ninja_squad.jb.codestory.ContentTypes;
 import com.ninja_squad.jb.codestory.HttpRequest;
 import com.ninja_squad.jb.codestory.HttpResponse;
 import org.junit.Test;
@@ -32,7 +33,7 @@ public class SkalaskelActionTest {
         HttpRequest request = HttpRequest.get("/scalaskel/change/7");
         HttpResponse result = action.execute(request);
         assertThat(result.getStatus()).isEqualTo(HttpResponse.Status._200_OK);
-        assertThat(result.getHeaders().getContentType().get().getName()).isEqualTo("application/json");
+        assertThat(result.getHeaders().getContentType().get().getName()).isEqualTo(ContentTypes.APPLICATION_JSON);
         assertThat(result.getBodyAsString(StandardCharsets.US_ASCII)).isIn(
             "[{'baz':'0';'qix':'0';'bar':'1';'foo':'0'},{'baz':'0';'qix':'0';'bar':'0';'foo':'7'}]".replace("'", "\""),
             "[{'baz':'0';'qix':'0';'bar':'0';'foo':'7'},{'baz':'0';'qix':'0';'bar':'1';'foo':'0'}]".replace("'", "\""));

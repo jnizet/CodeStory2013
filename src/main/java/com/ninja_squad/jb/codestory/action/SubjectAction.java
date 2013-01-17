@@ -1,11 +1,11 @@
 package com.ninja_squad.jb.codestory.action;
 
 import com.ninja_squad.jb.codestory.Action;
+import com.ninja_squad.jb.codestory.ContentTypes;
 import com.ninja_squad.jb.codestory.HttpHeaders;
 import com.ninja_squad.jb.codestory.HttpRequest;
 import com.ninja_squad.jb.codestory.HttpResponse;
 
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -15,12 +15,12 @@ import java.util.concurrent.atomic.AtomicReference;
  */
 public class SubjectAction implements Action {
     public static final String WELL_RECEIVED = "Bien recu";
-
+    public static final String NO_SUBJECT_POSTED = "Aucun sujet poste";
 
     private static final AtomicReference<HttpRequest> LAST_POST_REQUEST = new AtomicReference<>(null);
 
     @Override
-    public HttpResponse execute(HttpRequest request) throws IOException {
+    public HttpResponse execute(HttpRequest request) {
         if (request.getMethod() == HttpRequest.Method.GET) {
             HttpRequest subject = LAST_POST_REQUEST.get();
             return doGet(subject);
@@ -37,7 +37,7 @@ public class SubjectAction implements Action {
     private HttpResponse doPost(HttpRequest request) {
         LAST_POST_REQUEST.set(request);
         String subject = request.getBodyAsString();
-        System.out.println("Subject = " + subject);
+        System.out.println("Sujet = " + subject);
         return new HttpResponse(HttpResponse.Status._201_CREATED,
                                 HttpHeaders.PLAIN_ASCII_TEXT,
                                 WELL_RECEIVED.getBytes(StandardCharsets.US_ASCII));
@@ -45,11 +45,12 @@ public class SubjectAction implements Action {
 
     private HttpResponse doGet(HttpRequest subject) {
         if (subject == null) {
-            return HttpResponse.ok("Aucun sujet poste");
+            return HttpResponse.ok(NO_SUBJECT_POSTED);
         }
         else {
             return new HttpResponse(HttpResponse.Status._200_OK,
-                                    HttpHeaders.builder().setContentType("text/plain", subject.getContentCharset()).build(),
+                                    HttpHeaders.builder().setContentType(ContentTypes.TEXT_PLAIN,
+                                                                         subject.getContentCharset()).build(),
                                     subject.getBody());
         }
     }

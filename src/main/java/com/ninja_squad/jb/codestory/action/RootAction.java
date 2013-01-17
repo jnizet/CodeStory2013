@@ -5,7 +5,6 @@ import com.ninja_squad.jb.codestory.Action;
 import com.ninja_squad.jb.codestory.HttpRequest;
 import com.ninja_squad.jb.codestory.HttpResponse;
 
-import java.io.IOException;
 import java.util.Map;
 
 /**
@@ -53,7 +52,7 @@ public class RootAction implements Action {
                                               .build();
 
     @Override
-    public HttpResponse execute(HttpRequest request) throws IOException {
+    public HttpResponse execute(HttpRequest request) {
         if (request.getMethod() == HttpRequest.Method.GET) {
             String answer = ANSWERS_BY_QUESTION.get(request.getParameters().getSingleParameter("q").orNull());
             if (answer != null) {

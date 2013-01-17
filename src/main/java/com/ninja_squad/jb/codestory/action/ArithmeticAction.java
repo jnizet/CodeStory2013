@@ -6,7 +6,6 @@ import com.ninja_squad.jb.codestory.HttpResponse;
 import org.antlr.runtime.ANTLRReaderStream;
 import org.antlr.runtime.CommonTokenStream;
 
-import java.io.IOException;
 import java.io.StringReader;
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
@@ -20,7 +19,7 @@ import java.util.Locale;
 public class ArithmeticAction implements Action {
 
     @Override
-    public HttpResponse execute(HttpRequest request) throws IOException {
+    public HttpResponse execute(HttpRequest request) {
         String encodedExpression =
             request.getPathAndQueryString().substring(request.getPathAndQueryString().indexOf('=') + 1);
         try {

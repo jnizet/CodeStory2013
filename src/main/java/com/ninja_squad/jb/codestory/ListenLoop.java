@@ -121,7 +121,7 @@ class ListenLoop implements Runnable {
         out.close();
         return new HttpResponse(HttpResponse.Status._500_INTERNAL_ERROR,
                                 HttpHeaders.builder()
-                                           .setContentType("text/plain", StandardCharsets.UTF_8)
+                                           .setContentType(ContentTypes.TEXT_PLAIN, StandardCharsets.UTF_8)
                                            .build(),
                                 baos.toByteArray());
     }

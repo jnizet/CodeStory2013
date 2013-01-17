@@ -31,7 +31,7 @@ public class HttpServerError500Test {
             public Action getAction(HttpRequest request) {
                 return new Action() {
                     @Override
-                    public com.ninja_squad.jb.codestory.HttpResponse execute(HttpRequest request) throws IOException {
+                    public com.ninja_squad.jb.codestory.HttpResponse execute(HttpRequest request) {
                         throw new IllegalStateException(FAKE_EXCEPTION_WITH_ACCENTS);
                     }
                 };

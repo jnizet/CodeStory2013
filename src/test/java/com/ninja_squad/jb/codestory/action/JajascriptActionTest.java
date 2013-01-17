@@ -3,6 +3,7 @@ package com.ninja_squad.jb.codestory.action;
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.Lists;
 import com.ninja_squad.jb.codestory.Action;
+import com.ninja_squad.jb.codestory.ContentTypes;
 import com.ninja_squad.jb.codestory.HttpHeaders;
 import com.ninja_squad.jb.codestory.HttpParameters;
 import com.ninja_squad.jb.codestory.HttpRequest;
@@ -45,7 +46,7 @@ public class JajascriptActionTest {
                                               json.getBytes(StandardCharsets.US_ASCII));
         HttpResponse response = new JajascriptAction().execute(request);
         assertThat(response.getStatus()).isEqualTo(HttpResponse.Status._201_CREATED);
-        assertThat(response.getHeaders().getContentType().get().getName()).isEqualTo("application/json");
+        assertThat(response.getHeaders().getContentType().get().getName()).isEqualTo(ContentTypes.APPLICATION_JSON);
         new JSONParser().parse(response.getBodyAsString(StandardCharsets.US_ASCII));
     }
 
