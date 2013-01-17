@@ -103,6 +103,15 @@ public class HttpServerTest {
     }
 
     @Test
+    public void serverShouldAnswerWithNoForNDeloof() throws IOException {
+        String result = Request.Get(ADDRESS + "?q=As+tu+copie+le+code+de+ndeloof(OUI/NON/JE_SUIS_NICOLAS)")
+                               .execute()
+                               .returnContent()
+                               .asString();
+        assertThat(result).isEqualTo(RootAction.NDELOOF_ANSWER);
+    }
+
+    @Test
     public void serverShouldAnswerWithYesForSubject2() throws IOException {
         String result = Request.Get(ADDRESS + "?q=As+tu+bien+recu+le+second+enonce(OUI/NON)")
                                .execute()
