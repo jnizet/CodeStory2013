@@ -75,4 +75,11 @@ public class RootActionTest {
         assertThat(new RootAction().execute(request).getBodyAsString(StandardCharsets.US_ASCII))
             .isEqualTo("OUI");
     }
+
+    @Test
+    public void shouldReturnNoForNDeloofQuestion() throws IOException {
+        HttpRequest request = HttpRequest.get("/?q=As+tu+copie+le+code+de+ndeloof(OUI/NON/JE_SUIS_NICOLAS)");
+        assertThat(new RootAction().execute(request).getBodyAsString(StandardCharsets.US_ASCII))
+            .isEqualTo("NON");
+    }
 }

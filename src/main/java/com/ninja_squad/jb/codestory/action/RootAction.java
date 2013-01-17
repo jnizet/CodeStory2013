@@ -39,6 +39,9 @@ public class RootAction implements Action {
     public static final String SUBJECT2_RECEIVED_QUESTION = "As tu bien recu le second enonce(OUI/NON)";
     public static final String SUBJECT2_RECEIVED_ANSWER = "OUI";
 
+    public static final String NDELOOF_ACTION = "As tu copie le code de ndeloof(OUI/NON/JE_SUIS_NICOLAS)";
+    public static final String NDELOOF_ANSWER = "NON";
+
     public static final String BAD_REQUEST_ANSWER = "Could you repeat the question?";
 
     public static final Map<String, String> ANSWERS_BY_QUESTION =
@@ -50,6 +53,7 @@ public class RootAction implements Action {
                                               .put(SUBJECT_RECEIVED_QUESTION, SUBJECT_RECEIVED_ANSWER)
                                               .put(GOOD_NIGHT_QUESTION, GOOD_NIGHT_ANSWER)
                                               .put(SUBJECT2_RECEIVED_QUESTION, SUBJECT2_RECEIVED_ANSWER)
+                                              .put(NDELOOF_ACTION, NDELOOF_ANSWER)
                                               .build();
 
     @Override
