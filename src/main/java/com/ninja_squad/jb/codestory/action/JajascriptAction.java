@@ -46,6 +46,10 @@ public class JajascriptAction implements Action {
                                     marshal(result).getBytes(StandardCharsets.US_ASCII));
         }
         catch (Exception e) {
+            System.out.println("Exception in Jajascript: ");
+            e.printStackTrace();
+            System.out.println("Jajascript body:");
+            System.out.println(body);
             return HttpResponse.badRequest("Invalid data: " + body);
         }
     }

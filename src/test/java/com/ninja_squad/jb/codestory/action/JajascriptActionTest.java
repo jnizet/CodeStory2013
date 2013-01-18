@@ -32,6 +32,19 @@ import static org.fest.assertions.Assertions.*;
 public class JajascriptActionTest {
 
     @Test
+    public void shouldReturnBadData() {
+        String json = "[{'VOL': 'A'";
+
+        HttpRequest request = new HttpRequest(HttpRequest.Method.POST,
+                                              "/jajascript/optimize",
+                                              HttpParameters.NO_PARAMETER,
+                                              HttpHeaders.PLAIN_ASCII_TEXT,
+                                              json.getBytes(StandardCharsets.US_ASCII));
+        HttpResponse response = new JajascriptAction().execute(request);
+        assertThat(response.getStatus()).isEqualTo(HttpResponse.Status._400_BAD_REQUEST);
+    }
+
+    @Test
     public void shouldReturnBestPathinJSON() throws ParseException {
         String json = ("[{'VOL': 'A', 'DEPART': '0', 'DUREE': 5, 'PRIX': 10}"
                        + ", {'VOL': 'B', 'DEPART': 6, 'DUREE': 4, 'PRIX': 21}"
@@ -90,11 +103,14 @@ public class JajascriptActionTest {
 
         Path bestPath = new JajascriptAction().findBestPath(flights.toArray(new Flight[flights.size()]));
 
+        int gain = bestPath.getPath().get(0).getPrice();
         for (int i = 1; i < bestPath.getPath().size(); i++) {
             Flight f = bestPath.getPath().get(i);
             Flight before = bestPath.getPath().get(i - 1);
             assertThat(before.getStartTime() + before.getDuration() <= f.getStartTime());
+            gain += f.getPrice();
         }
+        assertThat(bestPath.getGain() == gain);
 
         /*
         Collections.sort(flights, ByDescendingStartTimeComparator.INSTANCE);
