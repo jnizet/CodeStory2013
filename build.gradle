@@ -42,10 +42,10 @@ findbugs {
 findbugsMain {
     reports {
         xml {
-            enabled = false
+            enabled =  project.hasProperty('ci')
         }
         html {
-            enabled = true
+            enabled = !project.hasProperty('ci')
         }
     }
 }
