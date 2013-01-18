@@ -44,8 +44,24 @@ public class JajascriptActionTest {
         assertThat(response.getStatus()).isEqualTo(HttpResponse.Status._400_BAD_REQUEST);
     }
 
+
     @Test
-    public void shouldReturnBestPathinJSON() throws ParseException {
+    public void shouldReturnEmptyPathInJSON() throws ParseException {
+        String json = "[]";
+        HttpRequest request = new HttpRequest(HttpRequest.Method.POST,
+                                              "/jajascript/optimize",
+                                              HttpParameters.NO_PARAMETER,
+                                              HttpHeaders.PLAIN_ASCII_TEXT,
+                                              json.getBytes(StandardCharsets.US_ASCII));
+        HttpResponse response = new JajascriptAction().execute(request);
+        assertThat(response.getStatus()).isEqualTo(HttpResponse.Status._201_CREATED);
+        assertThat(response.getHeaders().getContentType().get().getName()).isEqualTo(ContentTypes.APPLICATION_JSON);
+        new JSONParser().parse(response.getBodyAsString(StandardCharsets.US_ASCII));
+        assertThat(response.getBodyAsString(StandardCharsets.US_ASCII)).isEqualTo("{\"path\":[],\"gain\":0}");
+    }
+
+    @Test
+    public void shouldReturnBestPathInJSON() throws ParseException {
         String json = ("[{'VOL': 'A', 'DEPART': '0', 'DUREE': 5, 'PRIX': 10}"
                        + ", {'VOL': 'B', 'DEPART': 6, 'DUREE': 4, 'PRIX': 21}"
                        + ", {'VOL': 'C', 'DEPART': 8, 'DUREE': '1', 'PRIX': 10}"
