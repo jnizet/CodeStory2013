@@ -6,7 +6,6 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Ordering;
 import com.ninja_squad.jb.codestory.Action;
 import com.ninja_squad.jb.codestory.ContentTypes;
 import com.ninja_squad.jb.codestory.HttpHeaders;
@@ -112,10 +111,6 @@ public class JajascriptAction implements Action {
      * @return the best path
      */
     public Path findBestPath(Flight[] flights) {
-        // sort
-        Arrays.sort(flights, ByDescendingStartTimeComparator.INSTANCE);
-
-
         // create the graph
         createGraph(flights);
 
@@ -130,6 +125,10 @@ public class JajascriptAction implements Action {
     }
 
     private void createGraph(Flight[] flights) {
+        // sort. This step is unnecessary, but makes the graph creation faster,
+        // probably due to the way TreeSet works
+        Arrays.sort(flights, ByEndDateAndDurationComparator.INSTANCE);
+
         NavigableSet<Flight> flightsSortedByEndAndDuration =
             new TreeSet<>(ByEndDateAndDurationComparator.INSTANCE);
         for (Flight f : flights) {
@@ -317,15 +316,6 @@ public class JajascriptAction implements Action {
         }
 
 
-    }
-
-    protected static class ByDescendingStartTimeComparator extends Ordering<Flight> {
-        public static final ByDescendingStartTimeComparator INSTANCE = new ByDescendingStartTimeComparator();
-
-        @Override
-        public int compare(Flight left, Flight right) {
-            return Integer.compare(right.getStartTime(), left.getStartTime());
-        }
     }
 
     private static class LeafPredicate implements Predicate<Flight> {
