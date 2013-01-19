@@ -13,6 +13,7 @@ import org.antlr.runtime.RecognitionException;
 import org.antlr.runtime.RecognizerSharedState;
 
 @SuppressWarnings("all")
+@edu.umd.cs.findbugs.annotations.SuppressWarnings(justification = "generated code")
 public class MathLexer extends Lexer {
 	public static final int EOF=-1;
 	public static final int T__5=5;

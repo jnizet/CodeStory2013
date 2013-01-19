@@ -31,10 +31,10 @@ public class ArithmeticAction implements Action {
 
             DecimalFormat decimalFormat = new DecimalFormat("0.#", DecimalFormatSymbols.getInstance(Locale.FRENCH));
             String formattedResult = decimalFormat.format(result);
-            return HttpResponse.ok(formattedResult);
+            return StandardResponses.ok(formattedResult);
         }
         catch (Exception e) {
-            return HttpResponse.badRequest("Invalid expression: " + encodedExpression);
+            return StandardResponses.badRequest("Invalid expression: " + encodedExpression);
         }
     }
 }

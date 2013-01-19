@@ -4,15 +4,16 @@ import com.google.common.base.Objects;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
+import com.google.common.base.Strings;
 import com.google.common.base.Throwables;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ListMultimap;
-import com.google.common.collect.Maps;
 import com.google.common.io.ByteStreams;
 import com.google.common.io.LineProcessor;
 
-import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
@@ -22,14 +23,14 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 /**
  * An HTTP request
  * @author JB
  */
 public class HttpRequest {
-    private static final byte[] NO_BODY = new byte[0];
+
+    public static final byte[] NO_BODY = new byte[0];
 
     public static enum Method {
         GET,
@@ -41,18 +42,20 @@ public class HttpRequest {
 
     private Method method;
     private String path;
-    private String pathAndQueryString;
+    private String queryString;
     private HttpParameters parameters;
     private HttpHeaders headers;
     private byte[] body = NO_BODY;
 
-    public HttpRequest(@Nonnull Method method,
-                       @Nonnull String path,
-                       @Nonnull HttpParameters parameters,
-                       @Nonnull HttpHeaders headers,
-                       byte[] body) {
+    public HttpRequest(Method method,
+                       String path,
+                       String queryString,
+                       HttpParameters parameters,
+                       HttpHeaders headers,
+                       @Nullable byte[] body) {
         this.method = Preconditions.checkNotNull(method);
         this.path = Preconditions.checkNotNull(path);
+        this.queryString = Preconditions.checkNotNull(queryString);
         this.parameters = Preconditions.checkNotNull(parameters);
         this.headers = Preconditions.checkNotNull(headers);
         this.body = body == null ? NO_BODY : body;
@@ -65,15 +68,8 @@ public class HttpRequest {
         return new RequestParser().parse(in);
     }
 
-    public static HttpRequest get(@Nonnull String pathAndQueryString) {
-        Preconditions.checkNotNull(pathAndQueryString);
-        HttpRequest request = new HttpRequest();
-        request.method = Method.GET;
-        request.pathAndQueryString = pathAndQueryString;
-        new RequestParser().parsePathAndQueryString(pathAndQueryString, request);
-        request.headers = HttpHeaders.NO_HEADER;
-        request.body = NO_BODY;
-        return request;
+    public static HttpRequest get(String pathAndQueryString) {
+        return getBuilder(pathAndQueryString).build();
     }
 
     public Method getMethod() {
@@ -101,7 +97,12 @@ public class HttpRequest {
     }
 
     public String getPathAndQueryString() {
-        return pathAndQueryString;
+        if (Strings.isNullOrEmpty(queryString)) {
+            return path;
+        }
+        else {
+            return path + '?' + queryString;
+        }
     }
 
     public Charset getContentCharset() {
@@ -116,11 +117,23 @@ public class HttpRequest {
         return Objects.toStringHelper(this)
                       .add("method", method)
                       .add("path", path)
-                      .add("pathAndQueryString", pathAndQueryString)
+                      .add("queryString", queryString)
                       .add("parameters", parameters)
                       .add("headers", headers)
                       .add("body", Arrays.toString(body))
                       .toString();
+    }
+
+    public static Builder getBuilder(String pathAndQueryString) {
+        return builder(Method.GET, pathAndQueryString);
+    }
+
+    public static Builder postBuilder(String pathAndQueryString) {
+        return builder(Method.POST, pathAndQueryString);
+    }
+
+    public static Builder builder(Method method, String pathAndQueryString) {
+        return new Builder(method, pathAndQueryString);
     }
 
     private static class RequestParser {
@@ -135,7 +148,7 @@ public class HttpRequest {
             HttpLineReader lineReader = new HttpLineReader(in, StandardCharsets.US_ASCII);
             lineReader.readLines(new LineProcessor<Void>() {
                 private boolean firstLine = true;
-                private final Map<String, String> headers = Maps.newHashMap();
+                private final HttpHeaders.Builder builder = HttpHeaders.builder();
 
                 @Override
                 public boolean processLine(String line) throws IOException {
@@ -145,40 +158,40 @@ public class HttpRequest {
                         return true;
                     }
                     else if (line.isEmpty()) {
-                        request.headers = new HttpHeaders(headers);
                         return false;
                     }
                     else {
-                        parseHeader(line, headers);
+                        parseHeader(line, builder);
                         return true;
                     }
                 }
 
                 @Override
                 public Void getResult() {
+                    request.headers = builder.build();
                     return null;
                 }
             });
         }
 
-        private void parseHeader(String line, Map<String, String> headers) {
+        private void parseHeader(String line, HttpHeaders.Builder builder) {
             Iterator<String> parts = Splitter.on(':').trimResults().split(line).iterator();
-            headers.put(parts.next().toLowerCase(), parts.next());
+            builder.add(parts.next(), parts.next());
         }
 
         private void parseFirstLine(String line, HttpRequest request) {
             Iterator<String> parts = Splitter.on(' ').split(line).iterator();
             request.method = Method.valueOf(parts.next());
-            request.pathAndQueryString = parts.next();
-            parsePathAndQueryString(request.pathAndQueryString, request);
+            String pathAndQueryString = parts.next();
+            parsePathAndQueryString(pathAndQueryString, request);
         }
 
         private void parsePathAndQueryString(String pathAndQueryString, HttpRequest request) {
             try {
                 Iterator<String> parts = Splitter.on('?').split(pathAndQueryString).iterator();
                 request.path = parts.next();
-                String queryString = parts.hasNext() ? parts.next() : "";
-                parseQueryString(request, queryString, StandardCharsets.ISO_8859_1);
+                request.queryString = parts.hasNext() ? parts.next() : "";
+                parseQueryString(request, request.queryString, StandardCharsets.ISO_8859_1);
             }
             catch (UnsupportedEncodingException e) {
                 throw Throwables.propagate(e);
@@ -212,6 +225,65 @@ public class HttpRequest {
                 }
             }
             request.body = body;
+        }
+    }
+
+    public static final class Builder {
+        private final Method method;
+        private final String pathAndQueryString;
+        private final HttpHeaders.Builder headers = HttpHeaders.builder();
+        private byte[] body = NO_BODY;
+
+        public Builder(Method method, String pathAndQueryString) {
+            this.method = Preconditions.checkNotNull(method);
+            this.pathAndQueryString = Preconditions.checkNotNull(pathAndQueryString);
+        }
+
+        public Builder header(String name, String value) {
+            headers.add(name, value);
+            return this;
+        }
+
+        public Builder contentType(String name, Charset charset) {
+            headers.setContentType(name, charset);
+            return this;
+        }
+
+        public Builder body(byte[] body) {
+            this.body = Preconditions.checkNotNull(body);
+            this.headers.add(HttpHeaders.CONTENT_LENGTH, String.valueOf(body.length));
+            return this;
+        }
+
+        /**
+         * Sets the body as a string.
+         * @param body the body, as a string. If this method is called before setting the content type
+         * via {@link #contentType(String, java.nio.charset.Charset)} of {@link #header(String, String)},
+         * then the default charset is used (ISO-8859-1) to encode the string. Else, the specified charset is used.
+         */
+        public Builder body(String body) {
+            Preconditions.checkNotNull(body);
+            Charset charset = HttpHeaders.ContentType.DEFAULT_CHARSET;
+            if (headers.getContentType().isPresent()) {
+                charset = headers.getContentType().get().getCharset();
+            }
+            return this.body(body.getBytes(charset));
+        }
+
+        public HttpRequest build() {
+            HttpRequest request = new HttpRequest();
+            request.method = method;
+            RequestParser parser = new RequestParser();
+            parser.parsePathAndQueryString(pathAndQueryString, request);
+            request.headers = headers.build();
+            try {
+                parser.parseBody(new ByteArrayInputStream(body), request);
+            }
+            catch (IOException e) {
+                // impossible
+                throw new IllegalStateException(e);
+            }
+            return request;
         }
     }
 }

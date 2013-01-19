@@ -14,6 +14,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 
 @SuppressWarnings("all")
+@edu.umd.cs.findbugs.annotations.SuppressWarnings(justification = "generated code")
 public class MathParser extends Parser {
 	public static final String[] tokenNames = new String[] {
 		"<invalid>", "<EOR>", "<DOWN>", "<UP>", "FLOAT", "'('", "')'", "'*'", 

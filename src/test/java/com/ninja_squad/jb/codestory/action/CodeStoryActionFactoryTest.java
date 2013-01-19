@@ -1,9 +1,7 @@
 package com.ninja_squad.jb.codestory.action;
 
-import com.ninja_squad.jb.codestory.HttpHeaders;
-import com.ninja_squad.jb.codestory.HttpParameters;
 import com.ninja_squad.jb.codestory.HttpRequest;
-import com.ninja_squad.jb.codestory.HttpResponse;
+import com.ninja_squad.jb.codestory.HttpStatus;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -26,7 +24,7 @@ public class CodeStoryActionFactoryTest {
     @Test
     public void getActionShouldReturnNotFoundForUnknownPath() throws IOException {
         HttpRequest request = HttpRequest.get("/unknown");
-        assertThat(actionFactory.getAction(request).execute(request).getStatus()).isEqualTo(HttpResponse.Status._404_NOT_FOUND);
+        assertThat(actionFactory.getAction(request).execute(request).getStatus()).isEqualTo(HttpStatus._404_NOT_FOUND);
     }
 
     @Test
@@ -44,22 +42,14 @@ public class CodeStoryActionFactoryTest {
     }
 
     @Test
-    public void getActionShouldReturnJajascriptActionForJavjascriptChangePost() throws IOException {
-        HttpRequest request = new HttpRequest(HttpRequest.Method.POST,
-                                              "/jajascript/optimize",
-                                              HttpParameters.NO_PARAMETER,
-                                              HttpHeaders.NO_HEADER,
-                                              null);
+    public void getActionShouldReturnJajascriptActionForJajascriptChangePost() throws IOException {
+        HttpRequest request = HttpRequest.postBuilder("/jajascript/optimize").build();
         assertThat(actionFactory.getAction(request)).isInstanceOf(JajascriptAction.class);
     }
 
     @Test
     public void getActionShouldReturnSubjectActionForPost() throws IOException {
-        HttpRequest request = new HttpRequest(HttpRequest.Method.POST,
-                                              "/",
-                                              HttpParameters.NO_PARAMETER,
-                                              HttpHeaders.NO_HEADER,
-                                              null);
+        HttpRequest request = HttpRequest.postBuilder("/").build();
         assertThat(actionFactory.getAction(request)).isInstanceOf(SubjectAction.class);
     }
 

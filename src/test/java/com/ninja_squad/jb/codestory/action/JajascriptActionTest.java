@@ -5,10 +5,9 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.ninja_squad.jb.codestory.Action;
 import com.ninja_squad.jb.codestory.ContentTypes;
-import com.ninja_squad.jb.codestory.HttpHeaders;
-import com.ninja_squad.jb.codestory.HttpParameters;
 import com.ninja_squad.jb.codestory.HttpRequest;
 import com.ninja_squad.jb.codestory.HttpResponse;
+import com.ninja_squad.jb.codestory.HttpStatus;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -35,26 +34,24 @@ public class JajascriptActionTest {
     public void shouldReturnBadData() {
         String json = "[{'VOL': 'A'";
 
-        HttpRequest request = new HttpRequest(HttpRequest.Method.POST,
-                                              "/jajascript/optimize",
-                                              HttpParameters.NO_PARAMETER,
-                                              HttpHeaders.PLAIN_ASCII_TEXT,
-                                              json.getBytes(StandardCharsets.US_ASCII));
+        HttpRequest request = HttpRequest.postBuilder("/jajascript/optimize")
+                                         .contentType(ContentTypes.APPLICATION_JSON, StandardCharsets.US_ASCII)
+                                         .body(json)
+                                         .build();
         HttpResponse response = new JajascriptAction().execute(request);
-        assertThat(response.getStatus()).isEqualTo(HttpResponse.Status._400_BAD_REQUEST);
+        assertThat(response.getStatus()).isEqualTo(HttpStatus._400_BAD_REQUEST);
     }
 
 
     @Test
     public void shouldReturnEmptyPathInJSON() throws ParseException {
         String json = "[]";
-        HttpRequest request = new HttpRequest(HttpRequest.Method.POST,
-                                              "/jajascript/optimize",
-                                              HttpParameters.NO_PARAMETER,
-                                              HttpHeaders.PLAIN_ASCII_TEXT,
-                                              json.getBytes(StandardCharsets.US_ASCII));
+        HttpRequest request = HttpRequest.postBuilder("/jajascript/optimize")
+                                         .contentType(ContentTypes.APPLICATION_JSON, StandardCharsets.US_ASCII)
+                                         .body(json)
+                                         .build();
         HttpResponse response = new JajascriptAction().execute(request);
-        assertThat(response.getStatus()).isEqualTo(HttpResponse.Status._201_CREATED);
+        assertThat(response.getStatus()).isEqualTo(HttpStatus._201_CREATED);
         assertThat(response.getHeaders().getContentType().get().getName()).isEqualTo(ContentTypes.APPLICATION_JSON);
         new JSONParser().parse(response.getBodyAsString(StandardCharsets.US_ASCII));
         assertThat(response.getBodyAsString(StandardCharsets.US_ASCII)).isEqualTo("{\"path\":[],\"gain\":0}");
@@ -70,13 +67,12 @@ public class JajascriptActionTest {
                        + ", {'VOL': 'F', 'DEPART': 4, 'DUREE': 9, 'PRIX': 40}]").replace('\'', '"');
 
 
-        HttpRequest request = new HttpRequest(HttpRequest.Method.POST,
-                                              "/jajascript/optimize",
-                                              HttpParameters.NO_PARAMETER,
-                                              HttpHeaders.PLAIN_ASCII_TEXT,
-                                              json.getBytes(StandardCharsets.US_ASCII));
+        HttpRequest request = HttpRequest.postBuilder("/jajascript/optimize")
+                                         .contentType(ContentTypes.APPLICATION_JSON, StandardCharsets.US_ASCII)
+                                         .body(json)
+                                         .build();
         HttpResponse response = new JajascriptAction().execute(request);
-        assertThat(response.getStatus()).isEqualTo(HttpResponse.Status._201_CREATED);
+        assertThat(response.getStatus()).isEqualTo(HttpStatus._201_CREATED);
         assertThat(response.getHeaders().getContentType().get().getName()).isEqualTo(ContentTypes.APPLICATION_JSON);
         new JSONParser().parse(response.getBodyAsString(StandardCharsets.US_ASCII));
     }
@@ -147,11 +143,10 @@ public class JajascriptActionTest {
     private void testIteration() throws IOException {
         for (int number = 1; number < 10001; number *= 10) {
             String jsonString = generateJajascriptJSON(number);
-            HttpRequest request = new HttpRequest(HttpRequest.Method.POST,
-                                                  "/jajascript/optimize",
-                                                  HttpParameters.NO_PARAMETER,
-                                                  HttpHeaders.PLAIN_ASCII_TEXT,
-                                                  jsonString.getBytes(StandardCharsets.US_ASCII));
+            HttpRequest request = HttpRequest.postBuilder("/jajascript/optimize")
+                                             .contentType(ContentTypes.APPLICATION_JSON, StandardCharsets.US_ASCII)
+                                             .body(jsonString)
+                                             .build();
             Action action1 = new JajascriptAction();
 
             Stopwatch stopwatch = new Stopwatch();

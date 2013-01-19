@@ -2,9 +2,9 @@ package com.ninja_squad.jb.codestory.action;
 
 import com.ninja_squad.jb.codestory.Action;
 import com.ninja_squad.jb.codestory.ContentTypes;
-import com.ninja_squad.jb.codestory.HttpHeaders;
 import com.ninja_squad.jb.codestory.HttpRequest;
 import com.ninja_squad.jb.codestory.HttpResponse;
+import com.ninja_squad.jb.codestory.HttpStatus;
 
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.atomic.AtomicReference;
@@ -22,8 +22,7 @@ public class SubjectAction implements Action {
     @Override
     public HttpResponse execute(HttpRequest request) {
         if (request.getMethod() == HttpRequest.Method.GET) {
-            HttpRequest subject = LAST_POST_REQUEST.get();
-            return doGet(subject);
+            return doGet();
         }
         else {
             return doPost(request);
@@ -38,20 +37,24 @@ public class SubjectAction implements Action {
         LAST_POST_REQUEST.set(request);
         String subject = request.getBodyAsString();
         System.out.println("Sujet = " + subject);
-        return new HttpResponse(HttpResponse.Status._201_CREATED,
-                                HttpHeaders.PLAIN_ASCII_TEXT,
-                                WELL_RECEIVED.getBytes(StandardCharsets.US_ASCII));
+        return HttpResponse.builder()
+                           .status(HttpStatus._201_CREATED)
+                           .contentType(ContentTypes.TEXT_PLAIN, StandardCharsets.US_ASCII)
+                           .body(WELL_RECEIVED)
+                           .build();
     }
 
-    private HttpResponse doGet(HttpRequest subject) {
+    private HttpResponse doGet() {
+        HttpRequest subject = LAST_POST_REQUEST.get();
         if (subject == null) {
-            return HttpResponse.ok(NO_SUBJECT_POSTED);
+            return StandardResponses.ok(NO_SUBJECT_POSTED);
         }
         else {
-            return new HttpResponse(HttpResponse.Status._200_OK,
-                                    HttpHeaders.builder().setContentType(ContentTypes.TEXT_PLAIN,
-                                                                         subject.getContentCharset()).build(),
-                                    subject.getBody());
+            return HttpResponse.builder()
+                               .status(HttpStatus._200_OK)
+                               .contentType(ContentTypes.TEXT_PLAIN, subject.getContentCharset())
+                               .body(subject.getBody())
+                               .build();
         }
     }
 }

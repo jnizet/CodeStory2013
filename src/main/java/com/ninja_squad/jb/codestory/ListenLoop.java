@@ -1,18 +1,17 @@
 package com.ninja_squad.jb.codestory;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;
 import com.google.common.io.Closeables;
 
-import javax.annotation.Nonnull;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
@@ -37,10 +36,10 @@ class ListenLoop implements Runnable {
      */
     private final AtomicBoolean stopped = new AtomicBoolean(false);
 
-    public ListenLoop(@Nonnull ServerSocket serverSocket,
-                      @Nonnull ActionFactory actionFactory) {
-        this.serverSocket = serverSocket;
-        this.actionFactory = actionFactory;
+    public ListenLoop(ServerSocket serverSocket,
+                      ActionFactory actionFactory) {
+        this.serverSocket = Preconditions.checkNotNull(serverSocket);
+        this.actionFactory = Preconditions.checkNotNull(actionFactory);
         this.requestExecutor = Executors.newCachedThreadPool();
     }
 
@@ -112,17 +111,17 @@ class ListenLoop implements Runnable {
     }
 
     @VisibleForTesting
-    protected HttpResponse createErrorResponse(Exception e) {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        PrintWriter out = new PrintWriter(new OutputStreamWriter(baos, StandardCharsets.UTF_8));
+    HttpResponse createErrorResponse(Exception e) {
+        StringWriter sw = new StringWriter();
+        PrintWriter out = new PrintWriter(sw);
         out.println("Internal error:");
         e.printStackTrace(out);
         out.flush();
         out.close();
-        return new HttpResponse(HttpResponse.Status._500_INTERNAL_ERROR,
-                                HttpHeaders.builder()
-                                           .setContentType(ContentTypes.TEXT_PLAIN, StandardCharsets.UTF_8)
-                                           .build(),
-                                baos.toByteArray());
+        return HttpResponse.builder()
+                           .status(HttpStatus._500_INTERNAL_ERROR)
+                           .contentType(ContentTypes.TEXT_PLAIN, StandardCharsets.UTF_8)
+                           .body(sw.toString())
+                           .build();
     }
 }

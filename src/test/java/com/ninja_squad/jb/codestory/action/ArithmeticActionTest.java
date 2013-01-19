@@ -2,6 +2,7 @@ package com.ninja_squad.jb.codestory.action;
 
 import com.ninja_squad.jb.codestory.HttpRequest;
 import com.ninja_squad.jb.codestory.HttpResponse;
+import com.ninja_squad.jb.codestory.HttpStatus;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -47,6 +48,6 @@ public class ArithmeticActionTest {
         HttpRequest request = HttpRequest.get("/?q=1+2*3/4-5+");
         HttpResponse result = new ArithmeticAction().execute(request);
         assertThat(result.getBodyAsString(StandardCharsets.US_ASCII)).isEqualTo("Invalid expression: 1+2*3/4-5+");
-        assertThat(result.getStatus()).isEqualTo(HttpResponse.Status._400_BAD_REQUEST);
+        assertThat(result.getStatus()).isEqualTo(HttpStatus._400_BAD_REQUEST);
     }
 }

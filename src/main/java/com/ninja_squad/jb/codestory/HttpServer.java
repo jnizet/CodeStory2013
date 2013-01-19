@@ -1,5 +1,6 @@
 package com.ninja_squad.jb.codestory;
 
+import com.google.common.base.Preconditions;
 import com.ninja_squad.jb.codestory.action.CodeStoryActionFactory;
 
 import java.io.IOException;
@@ -34,6 +35,7 @@ public class HttpServer {
      * @throws IOException if the server socket couldn't be created
      */
     public void start(ActionFactory actionFactory) throws IOException {
+        Preconditions.checkNotNull(actionFactory);
         listenLoop = new ListenLoop(new ServerSocket(port), actionFactory);
         mainExecutor.execute(listenLoop);
     }

@@ -60,9 +60,9 @@ public class RootAction implements Action {
         if (request.getMethod() == HttpRequest.Method.GET) {
             String answer = ANSWERS_BY_QUESTION.get(request.getParameters().getSingleParameter("q").orNull());
             if (answer != null) {
-                return HttpResponse.ok(answer);
+                return StandardResponses.ok(answer);
             }
         }
-        return HttpResponse.badRequest(BAD_REQUEST_ANSWER);
+        return StandardResponses.badRequest(BAD_REQUEST_ANSWER);
     }
 }

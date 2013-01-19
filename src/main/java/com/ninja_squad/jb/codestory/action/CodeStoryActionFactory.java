@@ -4,9 +4,10 @@ import com.google.common.base.Supplier;
 import com.google.common.collect.ImmutableMap;
 import com.ninja_squad.jb.codestory.Action;
 import com.ninja_squad.jb.codestory.ActionFactory;
-import com.ninja_squad.jb.codestory.HttpHeaders;
+import com.ninja_squad.jb.codestory.ContentTypes;
 import com.ninja_squad.jb.codestory.HttpRequest;
 import com.ninja_squad.jb.codestory.HttpResponse;
+import com.ninja_squad.jb.codestory.HttpStatus;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
@@ -27,9 +28,11 @@ public class CodeStoryActionFactory implements ActionFactory {
     private static final Action DEFAULT_ACTION = new Action() {
         @Override
         public HttpResponse execute(HttpRequest request) {
-            return new HttpResponse(HttpResponse.Status._404_NOT_FOUND,
-                                    HttpHeaders.NO_HEADER,
-                                    DEFAULT_ANSWER.getBytes(StandardCharsets.US_ASCII));
+            return HttpResponse.builder()
+                               .status(HttpStatus._404_NOT_FOUND)
+                               .contentType(ContentTypes.TEXT_PLAIN, StandardCharsets.US_ASCII)
+                               .body(DEFAULT_ANSWER)
+                               .build();
         }
     };
 

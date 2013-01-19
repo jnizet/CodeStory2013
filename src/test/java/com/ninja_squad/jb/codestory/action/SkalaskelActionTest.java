@@ -3,6 +3,7 @@ package com.ninja_squad.jb.codestory.action;
 import com.ninja_squad.jb.codestory.ContentTypes;
 import com.ninja_squad.jb.codestory.HttpRequest;
 import com.ninja_squad.jb.codestory.HttpResponse;
+import com.ninja_squad.jb.codestory.HttpStatus;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -32,7 +33,7 @@ public class SkalaskelActionTest {
         SkalaskelAction action = new SkalaskelAction();
         HttpRequest request = HttpRequest.get("/scalaskel/change/7");
         HttpResponse result = action.execute(request);
-        assertThat(result.getStatus()).isEqualTo(HttpResponse.Status._200_OK);
+        assertThat(result.getStatus()).isEqualTo(HttpStatus._200_OK);
         assertThat(result.getHeaders().getContentType().get().getName()).isEqualTo(ContentTypes.APPLICATION_JSON);
         assertThat(result.getBodyAsString(StandardCharsets.US_ASCII)).isIn(
             "[{'baz':'0';'qix':'0';'bar':'1';'foo':'0'},{'baz':'0';'qix':'0';'bar':'0';'foo':'7'}]".replace("'", "\""),
@@ -43,7 +44,7 @@ public class SkalaskelActionTest {
         SkalaskelAction action = new SkalaskelAction();
         HttpRequest request = HttpRequest.get("/scalaskel/change/" + badAmount);
         HttpResponse result = action.execute(request);
-        assertThat(result.getStatus()).isEqualTo(HttpResponse.Status._400_BAD_REQUEST);
+        assertThat(result.getStatus()).isEqualTo(HttpStatus._400_BAD_REQUEST);
         assertThat(result.getBodyAsString(StandardCharsets.US_ASCII)).isEqualTo("Bad amount: " + badAmount);
     }
 

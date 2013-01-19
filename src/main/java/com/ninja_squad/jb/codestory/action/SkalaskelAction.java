@@ -7,9 +7,9 @@ import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Sets;
 import com.ninja_squad.jb.codestory.Action;
 import com.ninja_squad.jb.codestory.ContentTypes;
-import com.ninja_squad.jb.codestory.HttpHeaders;
 import com.ninja_squad.jb.codestory.HttpRequest;
 import com.ninja_squad.jb.codestory.HttpResponse;
+import com.ninja_squad.jb.codestory.HttpStatus;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
@@ -33,7 +33,7 @@ public class SkalaskelAction implements Action {
         catch (NumberFormatException e) {
             // ignore : send bad request
         }
-        return HttpResponse.badRequest("Bad amount: " + amountAsString);
+        return StandardResponses.badRequest("Bad amount: " + amountAsString);
     }
 
     private HttpResponse executeSkalaskel(int amount) {
@@ -42,11 +42,11 @@ public class SkalaskelAction implements Action {
         builder.append('[');
         Joiner.on(',').appendTo(builder, FluentIterable.from(changes).transform(Change.TO_JSON));
         builder.append(']');
-        return new HttpResponse(HttpResponse.Status._200_OK,
-                                HttpHeaders.builder()
-                                           .setContentType(ContentTypes.APPLICATION_JSON, StandardCharsets.US_ASCII)
-                                           .build(),
-                                builder.toString().getBytes(StandardCharsets.US_ASCII));
+        return HttpResponse.builder()
+                           .status(HttpStatus._200_OK)
+                           .contentType(ContentTypes.APPLICATION_JSON, StandardCharsets.US_ASCII)
+                           .body(builder.toString())
+                           .build();
     }
 
     @VisibleForTesting

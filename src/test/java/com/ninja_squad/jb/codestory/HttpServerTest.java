@@ -127,7 +127,8 @@ public class HttpServerTest {
                                   .bodyString("The subject", ContentType.TEXT_PLAIN)
                                   .execute()
                                   .returnResponse();
-        assertThat(response.getStatusLine().getStatusCode()).isEqualTo(com.ninja_squad.jb.codestory.HttpResponse.Status._201_CREATED.getCode());
+        assertThat(response.getStatusLine().getStatusCode()).isEqualTo(HttpStatus
+                                                                           ._201_CREATED.getCode());
         assertThat(new String(ByteStreams.toByteArray(response.getEntity().getContent()),
                               StandardCharsets.US_ASCII)).isEqualTo(SubjectAction.WELL_RECEIVED);
 

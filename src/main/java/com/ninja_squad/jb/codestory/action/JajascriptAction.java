@@ -8,17 +8,17 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.ninja_squad.jb.codestory.Action;
 import com.ninja_squad.jb.codestory.ContentTypes;
-import com.ninja_squad.jb.codestory.HttpHeaders;
 import com.ninja_squad.jb.codestory.HttpRequest;
 import com.ninja_squad.jb.codestory.HttpResponse;
+import com.ninja_squad.jb.codestory.HttpStatus;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
 import javax.annotation.Nullable;
-import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
@@ -39,23 +39,25 @@ public class JajascriptAction implements Action {
         try {
             Flight[] flights = unmarshal(body);
             Path result = findBestPath(flights);
-            return new HttpResponse(HttpResponse.Status._201_CREATED,
-                                    HttpHeaders.builder().setContentType(ContentTypes.APPLICATION_JSON,
-                                                                         StandardCharsets.US_ASCII).build(),
-                                    marshal(result).getBytes(StandardCharsets.US_ASCII));
+            return HttpResponse.builder()
+                               .status(HttpStatus._201_CREATED)
+                               .contentType(ContentTypes.APPLICATION_JSON, request.getContentCharset())
+                               .body(marshal(result))
+                               .build();
         }
         catch (Exception e) {
             System.out.println("Exception in Jajascript: ");
             e.printStackTrace();
             System.out.println("Jajascript body:");
             System.out.println(body);
-            return HttpResponse.badRequest("Invalid data: " + body);
+            return StandardResponses.badRequest("Invalid data: " + body);
         }
     }
 
     /**
      * Transforms a JSON-encoded array of flights into an array of Flight instances
      */
+    @SuppressWarnings("unchecked")
     private Flight[] unmarshal(String s) throws ParseException {
         JSONParser parser = new JSONParser();
         List<Map<String, Object>> array = (List<Map<String, Object>>) parser.parse(s);
@@ -87,6 +89,7 @@ public class JajascriptAction implements Action {
     /**
      * Transforms a path into a JSON string
      */
+    @SuppressWarnings("unchecked")
     private String marshal(Path path) {
         JSONObject o = new JSONObject();
         o.put("gain", path.getGain());
@@ -131,9 +134,7 @@ public class JajascriptAction implements Action {
 
         NavigableSet<Flight> flightsSortedByEndAndDuration =
             new TreeSet<>(ByEndDateAndDurationComparator.INSTANCE);
-        for (Flight f : flights) {
-            flightsSortedByEndAndDuration.add(f);
-        }
+        Collections.addAll(flightsSortedByEndAndDuration, flights);
 
         Flight fake = new Flight("fake", 0, -1, 0);
         for (Flight flight: flights) {
@@ -215,7 +216,7 @@ public class JajascriptAction implements Action {
     }
 
     protected static class Flight {
-        private static Function<Flight, String> TO_NAME = new Function<Flight, String>() {
+        private static final Function<Flight, String> TO_NAME = new Function<Flight, String>() {
             @Nullable
             @Override
             public String apply(Flight input) {

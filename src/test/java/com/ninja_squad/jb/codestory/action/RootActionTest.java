@@ -1,7 +1,7 @@
 package com.ninja_squad.jb.codestory.action;
 
 import com.ninja_squad.jb.codestory.HttpRequest;
-import com.ninja_squad.jb.codestory.HttpResponse;
+import com.ninja_squad.jb.codestory.HttpStatus;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -17,7 +17,7 @@ public class RootActionTest {
     @Test
     public void shouldReturnBadRequestForUnknownQuestion() throws IOException {
         HttpRequest request = HttpRequest.get("/?q=Comment+ca+va");
-        assertThat(new RootAction().execute(request).getStatus()).isEqualTo(HttpResponse.Status._400_BAD_REQUEST);
+        assertThat(new RootAction().execute(request).getStatus()).isEqualTo(HttpStatus._400_BAD_REQUEST);
     }
 
     @Test

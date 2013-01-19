@@ -2,42 +2,35 @@ package com.ninja_squad.jb.codestory;
 
 import com.google.common.base.Objects;
 import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 
+import java.io.IOException;
+import java.io.Writer;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.Map;
 
 /**
- * The headers of a request, stored in lower-case
+ * The headers of a request or response, stored in lower-case
  * @author JB
  */
 public final class HttpHeaders {
     public static final String CONTENT_LENGTH = "content-length";
     public static final String CONTENT_TYPE = "content-type";
 
-    public static final HttpHeaders NO_HEADER = new HttpHeaders(Collections.<String, String>emptyMap());
-    public static final HttpHeaders PLAIN_ASCII_TEXT =
-        new HttpHeaders(ImmutableMap.of(HttpHeaders.CONTENT_TYPE,
-                                        ContentTypes.TEXT_PLAIN + "; charset=us-ascii"));
-
+    /**
+     * The headers, including the content type
+     */
     private final Map<String, String> map;
-    private final Optional<ContentType> contentType;
 
-    public HttpHeaders(Map<String, String> map) {
-        this.map = ImmutableMap.copyOf(map);
-        String contentTypeAsString = map.get(CONTENT_TYPE);
-        if (contentTypeAsString == null) {
-            this.contentType = Optional.absent();
-        }
-        else {
-            this.contentType = Optional.of(ContentType.parse(contentTypeAsString));
-        }
-    }
+    /**
+     * The content type header
+     */
+    private final Optional<ContentType> contentType;
 
     private HttpHeaders(Builder builder) {
         this.map = ImmutableMap.copyOf(builder.map);
@@ -46,10 +39,6 @@ public final class HttpHeaders {
 
     public Optional<String> getHeader(String key) {
         return Optional.fromNullable(map.get(key));
-    }
-
-    public Map<String, String> asMap() {
-        return map;
     }
 
     public Optional<ContentType> getContentType() {
@@ -61,15 +50,33 @@ public final class HttpHeaders {
         return Objects.toStringHelper(this).add("map", map).add("contentType", contentType).toString();
     }
 
+    void writeTo(Writer writer) throws IOException {
+        String EOL = "\r\n";
+        for (Map.Entry<String, String> header : map.entrySet()) {
+            writer.write(header.getKey());
+            writer.write(':');
+            writer.write(header.getValue());
+            writer.write(EOL);
+        }
+        if (contentType.isPresent()) {
+            writer.write("content-type:");
+            writer.write(contentType.get().toHeaderValue());
+            writer.write(EOL);
+        }
+    }
+
     public static class ContentType {
+        /**
+         * The default HTTP charset
+         */
         public static final Charset DEFAULT_CHARSET = StandardCharsets.ISO_8859_1;
 
         private final String name;
         private final Charset charset;
 
-        private ContentType(String name, Charset charset) {
-            this.name = name;
-            this.charset = charset;
+        public ContentType(String name, Charset charset) {
+            this.name = Preconditions.checkNotNull(name);
+            this.charset = Preconditions.checkNotNull(charset);
         }
 
         public static ContentType parse(String line) {
@@ -109,25 +116,31 @@ public final class HttpHeaders {
         return new Builder();
     }
 
-    /**
-     * A builder for HTTP headers
-     */
     public static final class Builder {
         private final Map<String, String> map = Maps.newHashMap();
         private ContentType contentType;
 
-        private Builder() {
-        }
+        public Builder add(String name, String value) {
+            Preconditions.checkNotNull(name);
+            Preconditions.checkNotNull(value);
 
-        public Builder set(String name, String value) {
+            name = name.toLowerCase();
+            if (name.equals(CONTENT_TYPE)) {
+                contentType = ContentType.parse(value);
+            }
+
             map.put(name, value);
             return this;
         }
 
-        public Builder setContentType(String type, Charset charset) {
-            contentType = new ContentType(type, charset);
-            map.put(HttpHeaders.CONTENT_TYPE, contentType.toHeaderValue());
+        public Builder setContentType(String name, Charset charset) {
+            contentType = new ContentType(name, charset);
+            map.put(CONTENT_TYPE, name + ";charset=" + charset.name());
             return this;
+        }
+
+        public Optional<ContentType> getContentType() {
+            return Optional.fromNullable(contentType);
         }
 
         public HttpHeaders build() {

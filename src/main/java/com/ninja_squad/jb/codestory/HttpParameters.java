@@ -2,6 +2,7 @@ package com.ninja_squad.jb.codestory;
 
 import com.google.common.base.Objects;
 import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableListMultimap;
 import com.google.common.collect.ListMultimap;
 
@@ -12,8 +13,6 @@ import java.util.List;
  * @author JB
  */
 public class HttpParameters {
-    public static final HttpParameters NO_PARAMETER = new HttpParameters(ImmutableListMultimap.<String, String>of());
-
     private final ListMultimap<String, String> map;
 
     public HttpParameters(ListMultimap<String, String> map) {
@@ -21,11 +20,13 @@ public class HttpParameters {
     }
 
     public Optional<String> getSingleParameter(String name) {
+        Preconditions.checkNotNull(name);
         List<String> values = map.get(name);
         return Optional.fromNullable(values.isEmpty() ? null : values.get(0));
     }
 
     public List<String> getMultipleParameters(String name) {
+        Preconditions.checkNotNull(name);
         return map.get(name);
     }
 

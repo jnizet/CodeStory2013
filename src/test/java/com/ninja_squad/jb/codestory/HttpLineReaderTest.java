@@ -29,10 +29,7 @@ public class HttpLineReaderTest {
             @Override
             public boolean processLine(String line) throws IOException {
                 lines.add(line);
-                if (lines.size() == 3) {
-                    return false;
-                }
-                return true;
+                return lines.size() != 3;
             }
 
             @Override
