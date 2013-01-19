@@ -58,11 +58,6 @@ public final class HttpHeaders {
             writer.write(header.getValue());
             writer.write(EOL);
         }
-        if (contentType.isPresent()) {
-            writer.write("content-type:");
-            writer.write(contentType.get().toHeaderValue());
-            writer.write(EOL);
-        }
     }
 
     public static class ContentType {
