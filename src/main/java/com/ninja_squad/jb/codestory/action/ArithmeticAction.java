@@ -3,10 +3,9 @@ package com.ninja_squad.jb.codestory.action;
 import com.ninja_squad.jb.codestory.Action;
 import com.ninja_squad.jb.codestory.HttpRequest;
 import com.ninja_squad.jb.codestory.HttpResponse;
-import org.antlr.runtime.ANTLRReaderStream;
-import org.antlr.runtime.CommonTokenStream;
+import com.ninja_squad.jb.codestory.action.arithmetic.ArithmeticLexer;
+import com.ninja_squad.jb.codestory.action.arithmetic.ArithmeticParser;
 
-import java.io.StringReader;
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
@@ -23,11 +22,9 @@ public class ArithmeticAction implements Action {
         String encodedExpression =
             request.getPathAndQueryString().substring(request.getPathAndQueryString().indexOf('=') + 1);
         try {
-            ANTLRReaderStream input = new ANTLRReaderStream(new StringReader(encodedExpression.replace(',', '.')));
-            MathLexer lexer = new MathLexer(input);
-            CommonTokenStream tokens = new CommonTokenStream(lexer);
-            MathParser parser = new MathParser(tokens);
-            BigDecimal result = parser.expr();
+            ArithmeticLexer lexer = new ArithmeticLexer(encodedExpression.replace(',', '.'));
+            ArithmeticParser parser = new ArithmeticParser(lexer.parse());
+            BigDecimal result = parser.parse();
 
             DecimalFormat decimalFormat = new DecimalFormat("0.#", DecimalFormatSymbols.getInstance(Locale.FRENCH));
             String formattedResult = decimalFormat.format(result);
