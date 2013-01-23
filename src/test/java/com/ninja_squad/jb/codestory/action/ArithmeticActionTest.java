@@ -41,6 +41,9 @@ public class ArithmeticActionTest {
         request = HttpRequest.get("/?q=-(0,5+1)");
         assertThat(new ArithmeticAction().execute(request).getBodyAsString(StandardCharsets.US_ASCII))
             .isEqualTo("-1,5");
+        request = HttpRequest.get("/?q=1,5*1,5");
+        assertThat(new ArithmeticAction().execute(request).getBodyAsString(StandardCharsets.US_ASCII))
+            .isEqualTo("2,25");
     }
 
     @Test
