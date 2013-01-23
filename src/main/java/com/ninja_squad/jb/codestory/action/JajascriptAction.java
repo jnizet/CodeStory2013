@@ -1,11 +1,8 @@
 package com.ninja_squad.jb.codestory.action;
 
-import com.google.common.base.Function;
 import com.google.common.base.Objects;
-import com.google.common.base.Predicate;
-import com.google.common.collect.FluentIterable;
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.ninja_squad.jb.codestory.Action;
 import com.ninja_squad.jb.codestory.ContentTypes;
 import com.ninja_squad.jb.codestory.HttpRequest;
@@ -16,16 +13,13 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
-import javax.annotation.Nullable;
-import java.util.Arrays;
-import java.util.Collections;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.NavigableSet;
 import java.util.Set;
-import java.util.TreeSet;
 
 /**
  * Computes the best planning
@@ -33,12 +27,22 @@ import java.util.TreeSet;
  */
 public class JajascriptAction implements Action {
 
+    private Flight fake = new Flight("fake", 0, -1, 0);
+    private NavigableSet<Flight> sortedFlights = Sets.newTreeSet(ByEndDateAndDurationComparator.INSTANCE);
+
+    public JajascriptAction() {
+    }
+
+    JajascriptAction(Collection<Flight> flights) {
+        sortedFlights.addAll(flights);
+    }
+
     @Override
     public HttpResponse execute(HttpRequest request) {
         String body = request.getBodyAsString();
         try {
-            Flight[] flights = unmarshal(body);
-            Path result = findBestPath(flights);
+            unmarshal(body);
+            Path result = findBestPath();
             return HttpResponse.builder()
                                .status(HttpStatus._201_CREATED)
                                .contentType(ContentTypes.APPLICATION_JSON, request.getContentCharset())
@@ -58,20 +62,16 @@ public class JajascriptAction implements Action {
      * Transforms a JSON-encoded array of flights into an array of Flight instances
      */
     @SuppressWarnings("unchecked")
-    private Flight[] unmarshal(String s) throws ParseException {
+    private void unmarshal(String s) throws ParseException {
         JSONParser parser = new JSONParser();
         List<Map<String, Object>> array = (List<Map<String, Object>>) parser.parse(s);
-        Flight[] flights = new Flight[array.size()];
-        int i = 0;
         for (Map<String, Object> o : array) {
             Flight flight = new Flight((String) o.get("VOL"),
                                        toInt(o.get("DEPART")),
                                        toInt(o.get("DUREE")),
                                        toInt(o.get("PRIX")));
-            flights[i] = flight;
-            i++;
+            sortedFlights.add(flight);
         }
-        return flights;
     }
 
     /**
@@ -101,59 +101,41 @@ public class JajascriptAction implements Action {
         return o.toJSONString();
     }
 
-    /**
-     * Finds the best path among an array of flights. It works this way:
-     * <ol>
-     *    <li>Sort the flights by start date, in descending order (latest starting first)</li>
-     *    <li>In each flight, store its direct parents, i.e. the flights that can happen before
-     *        without overlapping. This creates a graph of flights.</li>
-     *    <li>For each leaf flight, compute and store the best parent and cumulated best gain,
-     *    recursively. Find the leaf with the best gain, and create a path from this leaf.</li>
-     * </ol>
-     * @param flights the flights to plan
-     * @return the best path
-     */
-    public Path findBestPath(Flight[] flights) {
-        // create the graph
-        createGraph(flights);
-
-        // find the leaves
-        Iterable<Flight> leaves = FluentIterable.from(Arrays.asList(flights)).filter(LeafPredicate.INSTANCE);
-
-        // get the best flight out of the leaves
-        Flight bestFlight = getBestFlight(leaves);
+    public Path findBestPath() {
+        // find the best flight
+        Flight bestFlight = findBestFlight();
 
         // create a path from the best leaf
         return createPath(bestFlight);
     }
 
-    private void createGraph(Flight[] flights) {
-        // sort. This step is unnecessary, but makes the graph creation faster,
-        // probably due to the way TreeSet works
-        Arrays.sort(flights, ByEndDateAndDurationComparator.INSTANCE);
+    private Flight findBestFlight() {
+        return findBestFlight(sortedFlights);
+    }
 
-        NavigableSet<Flight> flightsSortedByEndAndDuration =
-            new TreeSet<>(ByEndDateAndDurationComparator.INSTANCE);
-        Collections.addAll(flightsSortedByEndAndDuration, flights);
-
-        Flight fake = new Flight("fake", 0, -1, 0);
-        for (Flight flight: flights) {
-            fake.setEndTime(flight.getStartTime());
-
-            Set<Flight> parents = flightsSortedByEndAndDuration.tailSet(fake, false);
-            int biggestStartTimeInParents = Integer.MIN_VALUE;
-            for (Flight parent : parents) {
-                if (parent.getEndTime() > biggestStartTimeInParents) {
-                    flight.addParent(parent);
-                    if (parent.getStartTime() > biggestStartTimeInParents) {
-                        biggestStartTimeInParents = parent.getStartTime();
-                    }
-                }
-                else {
-                    break;
+    /**
+     * Gets the list of direct parents of the given flight, i.e. the flights that can starte before the current flight
+     * without overlapping, and which don't have any other non-overlapping flight between them and the given flight
+     * @param flight
+     * @return
+     */
+    private List<Flight> getParents(Flight flight) {
+        fake.setEndTime(flight.getStartTime());
+        List<Flight> result = Lists.newArrayList();
+        Set<Flight> parents = sortedFlights.tailSet(fake, false);
+        int biggestStartTimeInParents = Integer.MIN_VALUE;
+        for (Flight parent : parents) {
+            if (parent.getEndTime() > biggestStartTimeInParents) {
+                result.add(parent);
+                if (parent.getStartTime() > biggestStartTimeInParents) {
+                    biggestStartTimeInParents = parent.getStartTime();
                 }
             }
+            else {
+                break;
+            }
         }
+        return result;
     }
 
     private Path createPath(Flight flight) {
@@ -166,10 +148,15 @@ public class JajascriptAction implements Action {
         return new Path(path, gain);
     }
 
-    private Flight getBestFlight(Iterable<Flight> flights) {
+    /**
+     * Finds the best flight among the given flights
+     * @return the flight which has the best gain among the given flights. This method modifies the flights by
+     * storing their best gain and best parent, in order to avoid recomputing them every time.
+     */
+    private Flight findBestFlight(Iterable<Flight> flights) {
         Flight bestFlight = null;
         for (Flight flight : flights) {
-            computeBestPath(flight);
+            computeBestGain(flight);
             if (bestFlight == null || flight.getBestGain() > bestFlight.getBestGain()) {
                 bestFlight = flight;
             }
@@ -177,16 +164,22 @@ public class JajascriptAction implements Action {
         return bestFlight;
     }
 
-    private void computeBestPath(Flight flight) {
+    /**
+     * If the given flight has its best gain already computed, returns immediately. Else,
+     * gets the direct parents of the given flight, gets the best flight among them,
+     * computes the best gain, and stores the best gain and best parent in the flight.
+     */
+    private void computeBestGain(Flight flight) {
         if (flight.isBestGainComputed()) {
             return; // already computed
         }
 
-        if (flight.getParents().isEmpty()) {
+        List<Flight> parents = getParents(flight);
+        if (parents.isEmpty()) {
             flight.setBestGainComptationResult(flight.getPrice(), null);
         }
         else {
-            Flight bestParentFlight = getBestFlight(flight.getParents());
+            Flight bestParentFlight = findBestFlight(parents);
             flight.setBestGainComptationResult(flight.getPrice() + bestParentFlight.getBestGain(),
                                                bestParentFlight);
         }
@@ -216,27 +209,15 @@ public class JajascriptAction implements Action {
     }
 
     protected static class Flight {
-        private static final Function<Flight, String> TO_NAME = new Function<Flight, String>() {
-            @Nullable
-            @Override
-            public String apply(Flight input) {
-                return input.getName();
-            }
-        };
-
         private final String name;
         private final int startTime;
         private final int duration;
         private int endTime;
         private final int price;
-        private boolean leaf = true;
 
         private boolean bestGainComputed;
         private int bestGain;
         private Flight bestParent;
-
-        // direct parents, sorted by descending start time
-        private final List<Flight> parents = Lists.newArrayList();
 
         public Flight(String name, int startTime, int duration, int price) {
             this.name = name;
@@ -254,15 +235,6 @@ public class JajascriptAction implements Action {
             this.endTime = endTime;
         }
 
-        public boolean isLeaf() {
-            return leaf;
-        }
-
-        public void addParent(Flight flight) {
-            parents.add(flight);
-            flight.leaf = false;
-        }
-
         public String getName() {
             return name;
         }
@@ -277,10 +249,6 @@ public class JajascriptAction implements Action {
 
         public int getPrice() {
             return price;
-        }
-
-        public List<Flight> getParents() {
-            return parents;
         }
 
         public int getBestGain() {
@@ -305,26 +273,13 @@ public class JajascriptAction implements Action {
                           .add("duration", duration)
                           .add("endTime", endTime)
                           .add("price", price)
-                          .add("leaf", leaf)
                           .add("bestGain", bestGain)
                           .add("bestParent", bestParent == null ? null : bestParent.getName())
-                          .add("parents", Lists.newArrayList(Iterables.transform(parents, TO_NAME)))
                           .toString();
         }
 
         public boolean isBestGainComputed() {
             return bestGainComputed;
-        }
-
-
-    }
-
-    private static class LeafPredicate implements Predicate<Flight> {
-        public static final LeafPredicate INSTANCE = new LeafPredicate();
-
-        @Override
-        public boolean apply(Flight input) {
-            return input.isLeaf();
         }
     }
 

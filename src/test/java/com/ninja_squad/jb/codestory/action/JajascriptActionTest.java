@@ -85,7 +85,7 @@ public class JajascriptActionTest {
                                                                    new Flight("D", 9, 2, 10),
                                                                    new Flight("E", 12, 1, 10),
                                                                    new Flight("F", 4, 9, 40));
-        Path bestPath = new JajascriptAction().findBestPath(flights.toArray(new Flight[flights.size()]));
+        Path bestPath = new JajascriptAction(flights).findBestPath();
         assertThat(bestPath.getGain()).isEqualTo(41);
         assertThat(bestPath.getPath()).onProperty("name").containsExactly("A", "B", "E");
 
@@ -95,7 +95,7 @@ public class JajascriptActionTest {
                                      new Flight("D", 5, 5, 20),
                                      new Flight("E", 10, 3, 10),
                                      new Flight("F", 13, 9, 40));
-        bestPath = new JajascriptAction().findBestPath(flights.toArray(new Flight[flights.size()]));
+        bestPath = new JajascriptAction(flights).findBestPath();
         assertThat(bestPath.getGain()).isEqualTo(90);
         assertThat(bestPath.getPath()).onProperty("name").containsExactly("A", "C", "E", "F");
     }
@@ -113,7 +113,7 @@ public class JajascriptActionTest {
             flightsByName.put(f.getName(), f);
         }
 
-        Path bestPath = new JajascriptAction().findBestPath(flights.toArray(new Flight[flights.size()]));
+        Path bestPath = new JajascriptAction(flights).findBestPath();
 
         int gain = bestPath.getPath().get(0).getPrice();
         for (int i = 1; i < bestPath.getPath().size(); i++) {
@@ -123,25 +123,17 @@ public class JajascriptActionTest {
             gain += f.getPrice();
         }
         assertThat(bestPath.getGain() == gain);
-
-        /*
-        Collections.sort(flights, ByDescendingStartTimeComparator.INSTANCE);
-        for (Flight f : flights) {
-            System.out.println(f);
-        }
-        System.out.println("bestPath = " + bestPath);
-        */
     }
 
     @Test
     public void testPerf() throws IOException {
-        for (int i = 0; i< 10; i++) {
+        for (int i = 0; i < 10; i++) {
             testIteration();
         }
     }
 
     private void testIteration() throws IOException {
-        for (int number = 1; number < 10001; number *= 10) {
+        for (int number = 1; number < 10_001; number *= 10) {
             String jsonString = generateJajascriptJSON(number);
             HttpRequest request = HttpRequest.postBuilder("/jajascript/optimize")
                                              .contentType(ContentTypes.APPLICATION_JSON, StandardCharsets.US_ASCII)
@@ -163,7 +155,7 @@ public class JajascriptActionTest {
         JSONArray array = new JSONArray();
         for (int i = 0; i < number; i++) {
             int start = random.nextInt(23);
-            int duration = 1 + random.nextInt(24 - start);
+            int duration = 1 + random.nextInt(23 - start);
             JSONObject o = new JSONObject();
             o.put("VOL", String.valueOf(i + 1));
             o.put("DEPART", start);
