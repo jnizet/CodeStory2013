@@ -23,15 +23,7 @@ public class ArithmeticAction implements Action {
             ArithmeticParser parser = new ArithmeticParser(lexer.parse());
             BigDecimal result = parser.parse();
 
-            String formattedResult = result.toPlainString().replace('.', ',');
-            if (formattedResult.indexOf(',') >= 0) {
-                while (formattedResult.endsWith("0")) {
-                    formattedResult = formattedResult.substring(0, formattedResult.length() - 1);
-                }
-            }
-            if (formattedResult.endsWith(",")) {
-                formattedResult = formattedResult.substring(0, formattedResult.length() - 1);
-            }
+            String formattedResult = result.stripTrailingZeros().toPlainString().replace('.', ',');
             return StandardResponses.ok(formattedResult);
         }
         catch (Exception e) {
